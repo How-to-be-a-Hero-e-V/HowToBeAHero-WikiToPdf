@@ -6,6 +6,7 @@ This tool uses [Request](https://github.com/request/request) on [Parasoid](https
 
 Ensure two executables can be found using the `path` environment variable:
 
+* A NodeJS >8.0.0-installation
 * A python 2-installation
 * A `git` executable
 
@@ -13,9 +14,8 @@ Ensure two executables can be found using the `path` environment variable:
 
 1. Open a command line inside your local copy of this repository
 2. Run `npm install`
-3. Copy over `/config.yaml` to `/node_modules/parsoid/config.yaml`
-4. Run `node index.js`
-5. You're now able to make web-requests to generate PDFs.
+4. Run `npm run service`
+4. You're now able to make web-requests to generate PDFs.
 
 ## Example
 To generate a PDF containing "Begabungen", "Fähigkeiten", "Geistesblitzpunkte" and "Kategorie:Charaktererstellung" visit `http://localhost:3000/?title=Begabungen|F%C3%A4higkeiten|Geistesblitzpunkte|Kategorie:Charaktererstellung`.

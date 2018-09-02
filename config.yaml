@@ -8,7 +8,7 @@
 # - lib/config/ParsoidConfig.js for all the properties that you can configure
 #   here. Not all properties are documented here.
 
-worker_heartbeat_timeout: 300000
+worker_heartbeat_timeout: 800000
 
 logging:
     level: info
@@ -79,7 +79,7 @@ services:
         #allowCORS: 'some.domain.org'
 
         # Allow override of port/interface:
-        #serverPort: 8000
+        serverPort: 8000
         #serverInterface: '127.0.0.1'
 
         # Enable linting of some wikitext errors to the log

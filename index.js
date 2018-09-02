@@ -112,16 +112,15 @@ app.post('/renderedHTML',function(req,res){
     });
 });
 
-
-app.listen(3000, function() {
-    console.log('Example app listening on port 3000!');
+app.listen(process.env["npm_package_config_publicPort"], function() {
+    console.log(`Example app listening on port ${process.env["npm_package_config_publicPort"]}!`);
 });
 
 function queryAllTitles(titles) {
     let promises = [];
     for (let i = 0; i < titles.length; i++) {
         promises.push(new Promise((resolve, reject) => {
-            const requestURL = "http://localhost:8000/localhost/v3/page/html/" + encodeURIComponent(titles[i]) + "?" + "body_only=true&i=" + i;
+            const requestURL = `http://localhost:${process.env.npm_package_config_parsoidPort}/localhost/v3/page/html/${encodeURIComponent(titles[i])}?body_only=true&i=${i}`;
             request(requestURL, function(error, response, body) {
                 if (!error) {
                     console.log(requestURL);

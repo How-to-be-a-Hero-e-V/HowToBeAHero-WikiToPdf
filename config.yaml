@@ -8,7 +8,10 @@
 # - lib/config/ParsoidConfig.js for all the properties that you can configure
 #   here. Not all properties are documented here.
 
-worker_heartbeat_timeout: 800000
+# The number of http workers (as opposed to `cpu_workers` below)
+num_workers: 4
+
+worker_heartbeat_timeout: 300000
 
 logging:
     level: info

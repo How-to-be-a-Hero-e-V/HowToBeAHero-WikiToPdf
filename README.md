@@ -10,6 +10,8 @@ Ensure these executables can be found using the `path` environment variable:
 * A python 2-installation
 * A `git` executable
 
+On unix, ensure the `libfontconfig` is installed as well.
+
 ## Running the project
 
 1. Start a command line inside your cloned repository

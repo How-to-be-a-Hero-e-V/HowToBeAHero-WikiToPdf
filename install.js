@@ -9,7 +9,7 @@ fs.readFile(pathToConfig, 'utf8', function(err, data) {
 		return console.log(err);
 	}
 
-	var result = data.replace(/serverPort: \d*/, `serverPort: ${process.env.npm_package_config_parsoidPort}`);
+	var result = data.replace(/serverPort: .*/, `serverPort: ${process.env.npm_package_config_parsoidPort}`);
 	fs.writeFileSync(pathToConfig, result, 'utf8');
 
 	fs.createReadStream(pathToConfig).pipe(fs.createWriteStream(path.join(__dirname, "node_modules", "parsoid", "config.yaml")));

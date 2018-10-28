@@ -24,7 +24,9 @@ To generate a PDF containing "Begabungen", "Fähigkeiten", "Geistesblitzpunkte" 
 
 ## Ports
 
-Two ports are required to run this project.
-`publicPort` (default 3000), is used to receive HTTP requests and return the generated PDFs.
-`parsoidPort` (default 8000), is exclusively used internally to communicate between parsoid and the HTTP server handling user requests.
-If you need to change the ports, change them inside `package.json` and run `npm install` again.
+Two ports are required to run this project.  
+* `publicPort` (default 3000), is the user-facing port used to receive HTTP requests and return the generated PDFs.
+* `parsoidPort` (default 8000), is exclusively used internally to communicate between parsoid and the HTTP server handling user requests.
+
+To change ports, modify the associated value in `package.json` and run `npm install`. Ensure that `/index.js`, `/config.yaml` and `/node_modules/parsoid/config.yaml` are writable before running `npm install` - you can re-run this command as often as needed.  
+**If you need to change them at a later point, remember to run `npm install` again, after changing `package.json`.**

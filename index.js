@@ -13,12 +13,10 @@ const express = require('express');
 //TODO https
 const path = require('path');
 const fs = require('fs');
-const pdf = require('html-pdf');
 const options = {
     width: "210mm",
     height: "297mm",
-    timeout: '50000',
-    base: 'http://localhost:3000'
+    timeout: '50000'
 };
 //var http = require('http');
 //var https = require('https');
@@ -77,18 +75,7 @@ app.get('/', function(req, res) {
         let filledTemplate = addToTemplate(pagesPerTitle, titles);
         filledTemplate.then(function(data) {
             let pdfTitle = Date.now();
-            // if (!!debug) {
-                // console.log("SENDING:"+data);
-                res.send(data);
-            // } else {
-            //     pdf.create(data, options).toFile("./html-pdf/" + pdfTitle + ".pdf", function(err, response) {
-            //         if (err) return console.log(err);
-            //         console.log("SENDING PDF :" + "./html-pdf/" + pdfTitle + ".pdf");
-            //         res.sendFile("./html-pdf/" + pdfTitle + ".pdf", {root: "./"});
-            //     });
-            // }
-
-
+            res.send(data);
         }).catch((error) => {
             console.error(error)
         });
@@ -97,19 +84,6 @@ app.get('/', function(req, res) {
         console.error(error)
     });
 
-});
-/**
- * Accepts the rendered HTML with the split pages and generates a pdf
- */
-app.post('/renderedHTML',function(req,res){
-    let pdfTitle = Date.now();
-    //html is in here: req.body
-    console.log(req.body.html);
-    pdf.create(req.body.html , options).toFile("./html-pdf/" + pdfTitle + ".pdf", function(err, response) {
-        if (err) return console.log(err);
-        console.log("SENDING PDF :" + "./html-pdf/" + pdfTitle + ".pdf");
-        res.status(200).send({title: pdfTitle});
-    });
 });
 
 app.listen(process.env["npm_package_config_publicPort"], function() {

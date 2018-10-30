@@ -31,14 +31,7 @@ $(window).on('load', function() {
     createTableOfContents();
     //remove template
     $('#template').remove();
-    //send *new* HTML back to server to generate a pdf
-    $.ajax({
-        type: "POST",
-        url: '/renderedHTML',
-        data: JSON.stringify({html:getPageHTML()}),
-        success: handleData,
-        contentType:"application/json; charset=utf-8",
-    });
+    
     function createTableOfContents(){
         $('#template').clone().prop('id', "-1").insertBefore($('#0'));
         $('#-1').find('.title').text("Inhaltsverzeichnis");
@@ -59,16 +52,6 @@ $(window).on('load', function() {
             titles.push(titleName);
         }
     }
-    function handleData(success) {
-        //Create a link element, hide it, direct it towards the generated pdf, and then 'click' it programatically
-        let a = document.createElement("a");
-        a.style = "display: none";
-        a.href= "html-pdf/"+success.title+".pdf";
-        document.body.appendChild(a);
-        a.download = 'How To Be A Hero.pdf';
-        //programatically click the link to trigger the download
-        a.click();
-    };
     function splitContent(pageNumber, element, contentElements) {
         //iterate over each child of the content div
         for (let j = 0; j < contentElements.length; j++) {
@@ -106,10 +89,6 @@ $(window).on('load', function() {
             }
 
         }
-    }
-    /*get full HTML from this page*/
-    function getPageHTML() {
-        return "<html>" + $("html").html() + "</html>";
     }
 });
 jQuery.expr[':'].regex = function(elem, index, match) {

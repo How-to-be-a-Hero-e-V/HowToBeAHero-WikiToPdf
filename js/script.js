@@ -90,6 +90,8 @@ $(window).on('load', function() {
 
         }
     }
+
+    window.print();
 });
 jQuery.expr[':'].regex = function(elem, index, match) {
     var matchParams = match[3].split(','),

@@ -16,7 +16,8 @@ async function api<T = any>(params: Record<string, string>): Promise<T> {
 }
 
 export interface PageInfo {
-  title: string;      // normalisierter Titel
+  query: string;      // angefragter Titel
+  title: string;      // normalisierter Titel (nach Weiterleitung)
   exists: boolean;
   ns: number;
   revid: number;      // freigegebene Revision (ApprovedRevs) oder aktuellste
@@ -26,7 +27,7 @@ export interface PageInfo {
 let extApi: boolean | null = null;
 
 // Liefert pro Titel die Revision, die Leser im Wiki sehen. Mit der HTBAH-Extension ist das
-// die von ApprovedRevs freigegebene Version, ohne sie die aktuellste.
+// die von ApprovedRevs freigegebene Version, ohne sie die aktuellste. Weiterleitungen werden aufgeloest.
 export async function pageInfo(titles: string[]): Promise<PageInfo[]> {
   const out: PageInfo[] = [];
   for (let i = 0; i < titles.length; i += 50) {
@@ -35,15 +36,25 @@ export async function pageInfo(titles: string[]): Promise<PageInfo[]> {
       try {
         const j = await api({ action: "htbahpdf", titles: chunk.join("|") });
         extApi = true;
-        for (const p of j.htbahpdf.pages) out.push({ title: p.title, exists: !!p.exists, ns: p.ns ?? 0, revid: p.revid ?? 0, approved: !!p.approved });
+        for (const p of j.htbahpdf.pages) out.push({ query: p.query, title: p.title ?? p.query, exists: !!p.exists && !p.invalid, ns: p.ns ?? 0, revid: p.revid ?? 0, approved: !!p.approved });
         continue;
       } catch (e) {
-        if (extApi === null) { console.warn("htbahpdf-API nicht verfuegbar, nutze aktuellste Revisionen:", String(e)); extApi = false; }
+        // Nur "Modul unbekannt" ist dauerhaft; alles andere (Wiki gerade nicht erreichbar) weiterreichen
+        if (/Unrecognized value for parameter "action"/.test(String(e))) { if (extApi === null) console.warn("htbahpdf-API nicht verfuegbar, nutze aktuellste Revisionen"); extApi = false; }
         else throw e;
       }
     }
     const j = await api({ action: "query", prop: "info", titles: chunk.join("|"), redirects: "1" });
-    for (const p of j.query.pages) out.push({ title: p.title, exists: !p.missing, ns: p.ns, revid: p.lastrevid ?? 0, approved: false });
+    const map = new Map<string, string>(); // angefragt -> endgueltiger Titel
+    for (const n of j.query.normalized ?? []) map.set(n.from, n.to);
+    const redir = new Map<string, string>();
+    for (const r of j.query.redirects ?? []) redir.set(r.from, r.to);
+    const byTitle = new Map<string, any>((j.query.pages ?? []).map((p: any) => [p.title, p]));
+    for (const q of chunk) {
+      let t = map.get(q) ?? q; t = redir.get(t) ?? t;
+      const p = byTitle.get(t);
+      out.push({ query: q, title: t, exists: !!p && !p.missing && !p.invalid, ns: p?.ns ?? 0, revid: p?.lastrevid ?? 0, approved: false });
+    }
   }
   return out;
 }

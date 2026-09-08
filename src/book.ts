@@ -89,16 +89,18 @@ export async function resolve(spec: BookSpec): Promise<Resolved> {
   ].filter(g => g.titles.length);
   const all = groups.flatMap(g => g.titles);
   const infos = await pageInfo(all);
-  const byTitle = new Map(infos.map(i => [i.title.toLowerCase(), i]));
-  // Normalisierung (Unterstriche, Redirects) beruecksichtigen: Reihenfolge der Anfrage beibehalten
+  const byQuery = new Map(infos.map(i => [i.query.toLowerCase(), i]));
   const missing: string[] = [];
   let n = 0;
+  const seen = new Set<string>();
   const parts = groups.map(g => ({
     id: g.id, name: g.name,
     chapters: g.titles.map(t => {
-      const info = byTitle.get(t.toLowerCase()) ?? infos.find(i => i.title.replace(/_/g, " ").toLowerCase() === t.toLowerCase());
+      const info = byQuery.get(t.toLowerCase());
       if (!info || !info.exists) { missing.push(t); return null; }
       if (!cat.allowedNamespaces.includes(info.ns)) throw new HttpError(403, `Seite nicht erlaubt: ${info.title}`);
+      if (seen.has(info.title)) return null; // Weiterleitung auf eine schon enthaltene Seite
+      seen.add(info.title);
       n++;
       return { id: `c${n}`, title: info.title.replace(/^Kategorie:/, ""), wikiTitle: info.title, revid: info.revid };
     }).filter((c): c is NonNullable<typeof c> => !!c),

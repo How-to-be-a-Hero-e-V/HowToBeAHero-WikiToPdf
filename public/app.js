@@ -26,6 +26,7 @@
   if (q.get("fmt") === "a5") document.querySelector("input[name=fmt][value=a5]").checked = true;
   if (q.has("title")) $("#title").value = q.get("title");
   if (![...q.keys()].length) document.querySelectorAll("input[name=rules]").forEach(i => i.checked = true);
+  document.querySelectorAll("#sheets label").forEach(l => l.classList.toggle("sel", l.querySelector("input").checked));
 
   document.addEventListener("click", e => {
     const a = e.target.closest("a[data-all],a[data-none]");

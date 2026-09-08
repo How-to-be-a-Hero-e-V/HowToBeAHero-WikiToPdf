@@ -19,7 +19,8 @@ function waitPage(job: jobs.Job, shareUrl: string): Response {
   const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${esc(job.spec.title)} – PDF wird erstellt</title>
 <meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="${cfg.publicBase}/app.css"></head>
 <body class="wait"><main class="card"><img src="${cfg.publicBase}/logo.png" class="logo" alt="How to be a Hero">
-<h1>${esc(job.spec.title)}</h1><p id="msg">Das Buch wird gesetzt, das dauert meist unter einer Minute.</p>
+<img src="${cfg.publicBase}/assets/Howky_lesen.png" class="howky" alt="">
+<h1>${esc(job.spec.title)}</h1><p id="msg">Howky blättert schon: Das Buch wird gesetzt, das dauert meist unter einer Minute.</p>
 <div class="bar"><div id="fill"></div></div><p id="dl" hidden><a class="btn" id="dlink" href="#">PDF herunterladen</a></p>
 <p class="small">Teilen-Link: <code>${esc(shareUrl)}</code><br><a href="${cfg.publicBase}/">Zurück zum Buch-Baukasten</a></p></main>
 <script>const base=${JSON.stringify(cfg.publicBase)};const id=${JSON.stringify(job.id)};let n=0;
@@ -40,6 +41,10 @@ async function handle(req: Request, server: any): Promise<Response> {
   if (path === "/healthz") return text("ok");
   if (path === "/" || path === "/index.html") return new Response(Bun.file(join(pub, "index.html")), { headers: { "content-type": "text/html; charset=utf-8" } });
   if (path === "/app.js" || path === "/app.css") return new Response(Bun.file(join(pub, path.slice(1))), { headers: { "cache-control": "public, max-age=300" } });
+  if (/^\/assets\/[\w./-]+$/.test(path) && !path.includes("..")) {
+    const f = Bun.file(join(pub, path.slice(1)));
+    if (await f.exists()) return new Response(f, { headers: { "cache-control": "public, max-age=86400" } });
+  }
   if (path === "/logo.png") return new Response(Bun.file(join(import.meta.dir, "..", "template/images/LogoHD_300dpi.png")), { headers: { "cache-control": "public, max-age=86400" } });
 
   if (path === "/api/catalog") {

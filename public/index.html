@@ -4,58 +4,68 @@
 <meta charset="utf-8">
 <title>Buch-Baukasten – How to be a Hero</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="app.css?v=3">
 </head>
 <body>
 <header class="top">
-  <img src="logo.png" alt="How to be a Hero" class="logo">
-  <div>
-    <h1>Buch-Baukasten</h1>
-    <p>Stell dir dein eigenes HTBAH-Buch zusammen: Regelwerk, Module, Abenteuer und Charakterbogen in einem PDF. Immer auf dem Stand des Wikis.</p>
+  <div class="top-box">
+    <img src="logo.png" alt="How to be a Hero" class="logo">
+    <div>
+      <h1>Buch-Baukasten</h1>
+      <p>Regelwerk, Module, Abenteuer und Charakterbogen: Klick dir zusammen, was deine Runde braucht, und nimm es als PDF mit an den Spieltisch. Immer auf dem Stand des Wikis.</p>
+    </div>
+    <img src="assets/Howky_hauptseite.png" alt="" class="howky">
   </div>
 </header>
 
 <main id="app">
   <p id="loading">Katalog wird geladen …</p>
   <form id="form" hidden>
-    <section class="block">
-      <h2>1. Regelwerk <small><a href="#" data-all="rules">alle</a> · <a href="#" data-none="rules">keine</a></small></h2>
-      <div class="grid" id="rules"></div>
+    <section class="block c-green">
+      <h2><img class="badge" src="assets/How_to_regelwerk.png" alt="">1. Regelwerk <small><a href="#" data-all="rules">alle</a> · <a href="#" data-none="rules">keine</a></small></h2>
+      <div class="inner"><div class="grid" id="rules"></div></div>
     </section>
-    <section class="block">
-      <h2>2. Module <small><a href="#" data-none="modules">keine</a></small></h2>
-      <div id="modules"></div>
+    <section class="block c-blue">
+      <h2><img class="badge" src="assets/Howky_geistesblitz.png" alt="">2. Module <small><a href="#" data-none="modules">keine</a></small></h2>
+      <div class="inner" id="modules"></div>
     </section>
-    <section class="block">
-      <h2>3. Abenteuer <small><a href="#" data-none="adventures">keine</a></small></h2>
-      <div id="adventures"></div>
-      <label class="own">Eigenes Abenteuer oder andere Wiki-Seiten (Titel, mit | getrennt):
-        <input type="text" id="pages" placeholder="z. B. Mein Abenteuer|Hausregeln">
-      </label>
-    </section>
-    <section class="block">
-      <h2>4. Charakterbogen</h2>
-      <div class="grid sheets" id="sheets"></div>
-    </section>
-    <section class="block">
-      <h2>5. Format und Titel</h2>
-      <div class="row">
-        <label class="radio"><input type="radio" name="fmt" value="a4" checked> <b>A4</b> <span>zum Ausdrucken oder am Bildschirm</span></label>
-        <label class="radio"><input type="radio" name="fmt" value="a5"> <b>A5</b> <span>Buchformat, zwei Seiten je Blatt</span></label>
+    <section class="block c-orange">
+      <h2><img class="badge" src="assets/How_to_abenteuer.png" alt="" style="height:26px">3. Abenteuer <small><a href="#" data-none="adventures">keine</a></small></h2>
+      <div class="inner">
+        <div id="adventures"></div>
+        <label class="own">Eigenes Abenteuer oder andere Wiki-Seiten (Titel, mit | getrennt):
+          <input type="text" id="pages" placeholder="z. B. Mein Abenteuer|Hausregeln">
+        </label>
       </div>
-      <label class="own">Titel auf dem Umschlag (optional): <input type="text" id="title" maxlength="80" placeholder="wird sonst automatisch vergeben"></label>
+    </section>
+    <section class="block c-blue">
+      <h2><img class="badge" src="assets/How_to_charakter.png" alt="" style="height:26px">4. Charakterbogen</h2>
+      <div class="inner"><div class="grid sheets" id="sheets"></div></div>
+    </section>
+    <section class="block c-red">
+      <h2><img class="badge" src="assets/Stift.png" alt="">5. Format und Titel</h2>
+      <div class="inner">
+        <div class="row">
+          <label class="radio"><input type="radio" name="fmt" value="a4" checked> <b>A4</b> <span>zum Ausdrucken oder am Bildschirm</span></label>
+          <label class="radio"><input type="radio" name="fmt" value="a5"> <b>A5</b> <span>Buchformat, zwei Seiten je Blatt</span></label>
+        </div>
+        <label class="own">Titel auf dem Umschlag (optional): <input type="text" id="title" maxlength="80" placeholder="wird sonst automatisch vergeben"></label>
+      </div>
     </section>
     <section class="block actions">
-      <div id="summary"></div>
-      <button type="submit" id="go" class="btn">PDF erstellen</button>
-      <button type="button" id="share" class="btn secondary">Link kopieren</button>
-      <p id="status"></p>
-      <div class="bar" id="bar" hidden><div id="fill"></div></div>
-      <p id="result" hidden><a id="dlink" class="btn" href="#">PDF herunterladen</a></p>
+      <h2>Los geht's <span class="dice"><img src="assets/W20Rot.png" alt=""><img src="assets/W6Grün.png" alt=""><img src="assets/W8Blau.png" alt=""><img src="assets/W20Violett.png" alt=""><img src="assets/W6Rot.png" alt=""></span></h2>
+      <div class="inner">
+        <div id="summary"></div>
+        <button type="submit" id="go" class="btn">PDF erstellen</button>
+        <button type="button" id="share" class="btn secondary">Link kopieren</button>
+        <p id="status"></p>
+        <div class="bar" id="bar" hidden><div id="fill"></div></div>
+        <p id="result" hidden><a id="dlink" class="btn" href="#">PDF herunterladen</a></p>
+      </div>
     </section>
   </form>
 </main>
 <footer class="foot">Die Inhalte stammen aus dem Wiki und stehen unter CC BY-NC-SA 4.0. Jedes PDF enthält eine Lizenzseite mit den Quellen. <a id="wikilink" href="https://howtobeahero.de">Zurück zum Wiki</a></footer>
-<script src="app.js"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

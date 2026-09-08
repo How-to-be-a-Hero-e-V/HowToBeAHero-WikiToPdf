@@ -153,7 +153,7 @@ window.PagedConfig = { auto: true, before: () => window.__shrinkImages(${MAX_IMG
 // Bilder, die das Wiki nicht verkleinern konnte, im Browser auf MAX_IMG_PX Breite bringen (Dateigroesse)
 window.__shrinkImages = async function (max) {
   const imgs = [...document.images];
-  console.warn("shrink: " + imgs.length + " Bilder, " + imgs.filter(i => !i.complete).length + " noch ladend");
+  console.log("shrink: " + imgs.length + " Bilder");
   await Promise.all(imgs.map(i => i.complete ? Promise.resolve() : new Promise(r => { i.onload = i.onerror = r; })));
   for (const im of imgs) {
     if (im.naturalWidth <= max && im.naturalHeight <= max) continue;
@@ -170,7 +170,7 @@ window.__shrinkImages = async function (max) {
       await new Promise(r => { im.onload = im.onerror = r; });
     } catch (e) { console.warn("shrink failed", im.src, e); }
   }
-  console.warn("shrink: fertig");
+  console.log("shrink: fertig");
 };
 </script>
 </head><body class="fmt-${book.fmt}">

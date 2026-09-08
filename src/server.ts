@@ -1,5 +1,5 @@
 import { cfg } from "./config";
-import { specFromQuery, specToQuery, fileName, HttpError, resolve, buildBook } from "./book";
+import { specFromQuery, specToQuery, fileName, HttpError, resolve } from "./book";
 import { resolvedCatalog, loadCatalog, invalidateCatalog } from "./catalog";
 import * as jobs from "./jobs";
 import { join } from "node:path";
@@ -87,8 +87,9 @@ async function prerender() {
   for (const id of Object.keys(cat.books)) for (const fmt of ["a4", "a5"]) {
     try {
       const spec = await specFromQuery(new URLSearchParams({ book: id, fmt }));
-      const res = await buildBook(await resolve(spec));
-      console.log(`Vorrendern ${id}/${fmt}: ${res.cached ? "unveraendert" : "neu gebaut"}`);
+      const job = await jobs.submit(spec);
+      while (job.state === "queued" || job.state === "running") await Bun.sleep(1000);
+      console.log(`Vorrendern ${id}/${fmt}: ${job.state === "done" ? job.message : "Fehler: " + job.error}`);
     } catch (e) { console.error(`Vorrendern ${id}/${fmt} fehlgeschlagen:`, String(e)); }
   }
 }

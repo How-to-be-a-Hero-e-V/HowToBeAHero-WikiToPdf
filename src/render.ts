@@ -37,7 +37,7 @@ export async function renderPdf(html: string, opts: { timeoutMs?: number } = {})
     await ctx.route(bookUrl, route => route.fulfill({ status: 200, contentType: "text/html; charset=utf-8", body: html }));
     const page = await ctx.newPage();
     page.on("pageerror", e => console.warn("Seite (JS-Fehler):", e.message));
-    page.on("console", m => { if (m.type() === "error" || m.type() === "warning") console.warn("Seite (console):", m.text().slice(0, 300)); });
+    page.on("console", m => { if ((m.type() === "error" || m.type() === "warning") && !/favicon/.test(m.text())) console.warn("Seite (console):", m.text().slice(0, 300)); });
     page.setDefaultTimeout(opts.timeoutMs ?? 180_000);
     await page.goto(bookUrl, { waitUntil: "load" });
     await page.waitForFunction(() => (window as any).__pagedDone === true, null, { timeout: opts.timeoutMs ?? 180_000 });

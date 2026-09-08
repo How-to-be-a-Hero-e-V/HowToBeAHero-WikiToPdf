@@ -1,0 +1,101 @@
+/* Buchlayout fuer WikiToPdf v2 (Paged.js + Chromium) */
+@page {
+  margin: 20mm 17mm 22mm 17mm;
+  @top-center { content: string(chapter); font-family: "Open Sans", sans-serif; font-size: 7.5pt; color: #8a8a8a; letter-spacing: 0.5pt; text-transform: uppercase; vertical-align: bottom; padding-bottom: 3mm; }
+  @bottom-center { content: counter(page); font-family: "Alegreya SC", serif; font-size: 12pt; color: #EF902C; vertical-align: middle; }
+  @bottom-right { content: ""; background: var(--footer-img) right center / auto 5mm no-repeat; }
+}
+body.fmt-a5 { --base: 8.6pt; }
+body.fmt-a4 { --base: 10pt; }
+.fmt-a5 { --page-margin: 13mm 12mm 16mm 12mm; }
+@page cover { margin: 0; @top-center { content: none; } @bottom-center { content: none; } @bottom-right { content: none; } }
+@page plain { @top-center { content: none; } }
+@page :first { @top-center { content: none; } @bottom-center { content: none; } @bottom-right { content: none; } }
+
+html, body { margin: 0; padding: 0; }
+body { font-family: "Open Sans", "DejaVu Sans", sans-serif; font-size: var(--base, 10pt); line-height: 1.45; color: #222; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+* { box-sizing: border-box; }
+a { color: #c7681a; text-decoration: none; }
+a.ext { color: #333; }
+p { margin: 0 0 0.7em; orphans: 3; widows: 3; }
+img { max-width: 100%; height: auto; }
+
+/* Umschlag */
+.cover { page: cover; break-after: page; height: 100%; overflow: hidden; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #fbfbfb; padding: 15% 10%; }
+.cover-logo { width: 42%; margin-bottom: 8mm; }
+.cover-title { font-family: "Alegreya SC", serif; font-size: 3.2em; color: #EF902C; text-transform: lowercase; letter-spacing: 4pt; line-height: 1.15; }
+.cover-sub { margin-top: 6mm; font-size: 1.05em; color: #666; }
+.cover-dice { margin-top: 14mm; display: flex; gap: 6mm; justify-content: center; }
+.cover-dice img { height: 12mm; width: auto; }
+.cover-footer { position: absolute; bottom: 7%; left: 50%; transform: translateX(-50%); width: 38%; }
+
+/* Inhaltsverzeichnis */
+.toc-page { page: plain; break-after: page; }
+.toc-title, .chapter-title { font-family: "Alegreya SC", serif; font-weight: 700; color: #EF902C; text-transform: lowercase; letter-spacing: 3pt; font-size: 2.3em; margin: 0 0 0.6em; line-height: 1.15; break-after: avoid; }
+.chapter-title { string-set: chapter content(text); padding-bottom: 2mm; border-bottom: 2px solid #EF902C; }
+.chapter-title span { display: inline-block; }
+ol.toc, ol.toc ol { list-style: none; margin: 0; padding: 0; }
+ol.toc > li { margin: 0.45em 0; }
+ol.toc > li.toc-part { margin-top: 1.4em; font-family: "Alegreya SC", serif; font-size: 1.25em; text-transform: lowercase; letter-spacing: 2pt; color: #EF902C; }
+ol.toc > li.toc-ch > a, ol.toc > li.toc-part > a { font-weight: 700; }
+ol.toc ol { margin: 0.15em 0 0.3em 1.4em; font-size: 0.92em; }
+ol.toc ol li { margin: 0.12em 0; }
+ol.toc a, ol.toc .noref { display: flex; align-items: baseline; color: #222; }
+ol.toc a .t { flex: 0 1 auto; }
+ol.toc a .spacer { flex: 1 1 auto; border-bottom: 1px dotted #bbb; margin: 0 3pt; min-width: 6pt; position: relative; top: -3pt; }
+ol.toc a::after { content: target-counter(attr(href), page); font-family: "Alegreya SC", serif; color: #EF902C; flex: 0 0 auto; }
+
+/* Teil-Titelseite */
+.part-title { page: plain; break-before: page; break-after: page; height: 100%; display: flex; align-items: center; justify-content: center; }
+.part-inner { text-align: center; border: 3px double #EF902C; padding: 12mm 14mm; }
+.part-kicker { font-family: "Alegreya SC", serif; letter-spacing: 4pt; color: #999; text-transform: uppercase; font-size: 0.9em; }
+.part-inner h1 { font-family: "Alegreya SC", serif; color: #EF902C; text-transform: lowercase; letter-spacing: 4pt; font-size: 2.6em; margin: 2mm 0 0; }
+
+/* Kapitel */
+.chapter { break-before: page; }
+.chapter h2 { font-family: "Alegreya SC", serif; color: #EF902C; font-size: 1.55em; letter-spacing: 1pt; margin: 1.2em 0 0.4em; break-after: avoid; border-bottom: 1px solid #f3c48e; padding-bottom: 1pt; }
+.chapter h3 { font-size: 1.2em; margin: 1em 0 0.3em; color: #333; break-after: avoid; }
+h2 + figure, h3 + figure, h2 + p > img:only-child, h3 + p > img:only-child { break-before: avoid; }
+.chapter h4, .chapter h5 { font-size: 1.02em; margin: 0.8em 0 0.2em; break-after: avoid; }
+.mw-headline { font: inherit; }
+ul, ol { margin: 0.3em 0 0.7em; padding-left: 1.5em; }
+li { margin: 0.1em 0; }
+dl { margin: 0.4em 0; } dt { font-weight: 700; } dd { margin: 0 0 0.3em 1.2em; }
+blockquote { margin: 0.6em 1em; padding-left: 0.8em; border-left: 3px solid #f3c48e; color: #444; }
+hr { border: 0; border-top: 1px solid #ddd; margin: 1em 0; }
+pre, code, .box { font-family: "DejaVu Sans Mono", monospace; font-size: 0.9em; }
+pre, .box { background: #f8f9fa; border: 1px solid #eaecf0; padding: 0.7em; white-space: pre-wrap; margin: 0.6em 0; }
+.box { font-family: inherit; font-size: 0.95em; }
+.box p { margin: 0; }
+.video-note { font-style: italic; color: #666; }
+.url { font-family: "DejaVu Sans Mono", monospace; font-size: 0.85em; word-break: break-all; }
+
+/* Tabellen */
+table { border-collapse: collapse; font-size: 0.92em; margin: 0.6em 0; max-width: 100%; }
+table.wikitable { background: #f8f9fa; }
+table.wikitable th, table.wikitable td, table.wikitable > tr > th { border: 1px solid #c8ccd1; padding: 2pt 5pt; vertical-align: top; }
+table.wikitable th { background: #fde7cd; text-align: left; }
+tr { break-inside: avoid; }
+thead { display: table-header-group; }
+
+/* Bilder und Floats */
+figure { margin: 0.5em 0; break-inside: avoid; }
+figure.mw-halign-right, .floatright, .tright, div.thumb.tright { float: right; clear: right; margin: 0.2em 0 0.6em 1em; max-width: 45%; }
+figure.mw-halign-left, .floatleft, .tleft, div.thumb.tleft { float: left; clear: left; margin: 0.2em 1em 0.6em 0; max-width: 45%; }
+figure.mw-halign-center, .center { text-align: center; margin: 0.6em auto; }
+figure img, .thumbinner img { max-width: 100%; height: auto; }
+figcaption, .thumbcaption { font-size: 0.85em; color: #555; margin-top: 2pt; }
+.heroimage img, img[style*="width:1500px"], img[style*="width:800px"] { width: 100% !important; }
+.mw-halign-right img, .floatright img { max-width: 100%; }
+.center_box { text-align: center; }
+.flexbox { display: block; }
+.flexbox > * { margin-bottom: 0.5em; }
+
+/* Lizenz */
+.license { page: plain; break-before: page; font-size: 0.92em; }
+.license h2 { font-family: "Alegreya SC", serif; color: #EF902C; font-size: 1.4em; margin-top: 1.2em; }
+ol.sources { font-size: 0.88em; padding-left: 1.4em; }
+ol.sources li { margin: 0.15em 0; }
+
+/* Paged.js */
+.pagedjs_page { background: #fff; }

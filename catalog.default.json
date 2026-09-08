@@ -1,0 +1,50 @@
+{
+  "rulebook": {
+    "name": "Regelwerk",
+    "chapters": [
+      "Pen and Paper: Was ist das?",
+      "Begriffsklärung",
+      "Würfelarten",
+      "Begabungen",
+      "Handeln",
+      "Wissen",
+      "Soziales",
+      "Fähigkeiten",
+      "Lebenspunkte",
+      "Geistesblitzpunkte",
+      "Vor- und Nachteile",
+      "Rechnerische Charaktererstellung",
+      "Würfe & Proben (kritische Erfolge & Fehlschläge)",
+      "Kampf"
+    ]
+  },
+  "modules": {
+    "name": "Module",
+    "groups": [
+      { "id": "official", "name": "Offizielle Module", "category": "Offizielle Module" },
+      { "id": "confirmed", "name": "Bestätigte Module", "category": "Bestätigte Module" },
+      { "id": "wild", "name": "\"Wilde\" Module", "category": "\"Wilde\" Module" }
+    ]
+  },
+  "adventures": {
+    "name": "Abenteuer",
+    "groups": [
+      { "id": "official", "name": "Offizielle Abenteuer", "category": "Offizielle Abenteuer" },
+      { "id": "confirmed", "name": "Bestätigte Abenteuer", "category": "Bestätigte Abenteuer" },
+      { "id": "onepage", "name": "One Page Adventures", "category": "One Page Adventures" },
+      { "id": "wild", "name": "\"Wilde\" Abenteuer", "category": "\"Wilde\" Abenteuer" }
+    ]
+  },
+  "sheets": [
+    { "id": "standard", "name": "Standardbogen", "file": "How_to_be_a_Hero_Charakterbogen.pdf", "description": "Der offizielle Charakterbogen, ausfüllbar am Rechner." },
+    { "id": "hero", "name": "Hero-Design", "file": "HTBAH_Charakterbogen_Hero-Design.pdf", "description": "Bunte Variante im Hero-Look, ausfüllbar." },
+    { "id": "grau", "name": "Graustufen", "file": "HTBAH_Charakterbogen_v5_graustufen.pdf", "description": "Druckerfreundlich in Graustufen, ausfüllbar." },
+    { "id": "dysomnia", "name": "Dysomnia", "file": "Dysomnia_Charakterbogen.pdf", "description": "Setting-Bogen für Dysomnia." },
+    { "id": "schwarzertod", "name": "Der Schwarze Tod", "file": "SchwarzerTod_Charakterbogen.pdf", "description": "Setting-Bogen für Der Schwarze Tod." }
+  ],
+  "books": {
+    "regelwerk": { "title": "Regelwerk", "rules": "all", "sheet": "standard" }
+  },
+  "allowedNamespaces": [0, 14],
+  "badgeFiles": ["Offiziell_klein.png", "Bestaetigt_klein.png", "Wild_klein.png"]
+}

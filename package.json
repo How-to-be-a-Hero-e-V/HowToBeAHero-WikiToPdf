@@ -1,47 +1,20 @@
 {
   "name": "howtobeahero-wikitopdf",
-  "version": "1.0.0",
-  "description": "This tool uses [Parasoid](https://www.mediawiki.org/wiki/Parsoid) to fetch specific pages of the [How to be a Hero](https://howtobeahero.de/index.php?title=Hauptseite) Wiki, put them in a nice HTML-template and generate a PDF via [html-pdf](https://www.npmjs.com/package/html-pdf) for a printable version.",
-  "main": "index.js",
-  "dependencies": {
-    "express": "^4.16.2",
-    "fs": "0.0.1-security",
-    "jquery": "^3.3.1",
-    "jsdom": "^11.6.2",
-    "parsoid": "^0.9.0",
-    "path": "^0.12.7",
-    "request": "^2.83.0"
-  },
-  "devDependencies": {},
+  "version": "2.0.0",
+  "description": "Baut aus Seiten des How-to-be-a-Hero-Wikis Buch-PDFs (Regelwerk, Module, Abenteuer, Charakterbogen).",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
   "scripts": {
-    "postinstall": "node ./install.js",
-    "service": "node ./index.js"
+    "start": "bun run src/server.ts",
+    "dev": "bun --watch src/server.ts"
   },
-  "author": "Setup",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Setup007/HowToBeAHero-WikiToPdf.git"
+  "dependencies": {
+    "node-html-parser": "6.1.13",
+    "pagedjs": "0.4.3",
+    "pdf-lib": "1.17.1",
+    "playwright-core": "1.47.2"
   },
-  "keywords": [
-    "pen",
-    "and",
-    "paper",
-    "how",
-    "to",
-    "be",
-    "a",
-    "hero",
-    "howtobeahero",
-    "rocketbeanstv",
-    "rocketbeans"
-  ],
-  "bugs": {
-    "url": "https://github.com/Setup007/HowToBeAHero-WikiToPdf/issues"
-  },
-  "homepage": "https://github.com/Setup007/HowToBeAHero-WikiToPdf#readme",
-  "config": {
-    "publicPort": 3000,
-    "parsoidPort": 8000
+  "devDependencies": {
+    "@types/bun": "1.1.10"
   }
 }

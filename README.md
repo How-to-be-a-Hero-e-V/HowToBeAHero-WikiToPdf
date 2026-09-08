@@ -1,32 +1,92 @@
 # HowToBeAHero-WikiToPdf
 
-This tool uses [Request](https://github.com/request/request) on [Parasoid](https://www.mediawiki.org/wiki/Parsoid) to fetch specific pages of the [How to be a Hero](https://howtobeahero.de/index.php?title=Hauptseite) Wiki, put them in a nice HTML-template and generate a PDF via [html-pdf](https://www.npmjs.com/package/html-pdf) for a printable version.
+Baut aus Seiten des [How-to-be-a-Hero-Wikis](https://howtobeahero.de) Buch-PDFs: das Regelwerk,
+einzelne Module und Abenteuer, wahlweise mit ausfüllbarem Charakterbogen, in A4 oder A5.
+Spielleitungen klicken sich im **Buch-Baukasten** ihr Buch zusammen und bekommen einen Link, den sie an
+ihre Gruppe weitergeben können.
 
-## Requirements
+Version 2 (2026) ersetzt die alte Node/Parsoid/PhantomJS-Fassung von 2018 (Tag `v1-legacy`).
 
-Ensure these executables can be found using the `path` environment variable:
+## Wie es funktioniert
 
-* A NodeJS >8.0.0-installation
-* A python 2-installation
-* A `git` executable
+```
+Browser ──> Caddy ──/pdf/*──> wikitopdf (Bun + Chromium)
+                                  │  api.php (intern, Docker-Netz)
+                                  ▼
+                            MediaWiki-Container
+```
 
-On unix, ensure the `libfontconfig` is installed as well.
+1. Der Dienst fragt über die Wiki-API die Revision ab, die Leser sehen (`action=htbahpdf` aus der
+   [MediaWiki-Erweiterung](https://github.com/How-to-be-a-Hero-e-V/HowToBeAHero-WikiToPdf-MediawikiIntegration),
+   berücksichtigt ApprovedRevs) und holt das fertige HTML mit `action=parse&oldid=…`.
+2. Das HTML wird bereinigt (Bearbeiten-Links, Abzeichen, Videos, Inhaltsverzeichnisse) und in das
+   Buch-Template gegossen: Umschlag, Inhaltsverzeichnis mit Seitenzahlen, Teil-Titelseiten, laufende
+   Kopfzeilen, Lizenzseite mit Quellen.
+3. [Paged.js](https://pagedjs.org) setzt die Seiten im headless Chromium (Playwright), das PDF entsteht
+   mit `page.pdf()`. Schriften (Alegreya SC, Open Sans) liegen im Image, es wird nichts aus dem Internet
+   geladen; der Container spricht nur mit `mediawiki:80`.
+4. Der gewählte Charakterbogen wird mit pdf-lib angehängt. Die Formularfelder bleiben erhalten
+   (AcroForm wird neu aufgebaut), zusätzlich hängt das Original als Dateianhang im PDF.
+5. Fertige Bücher werden unter einem Hash aus Titeln, Revisions-IDs, Format und Template-Version
+   zwischengespeichert. Vordefinierte Bücher (`books` im Katalog) werden nachts vorgerendert.
 
-## Running the project
+## Endpunkte
 
-1. Start a command line inside your cloned repository
-2. `npm install`
-3. `npm run service`
-4. You're now able to make web-requests to generate PDFs.
+| Pfad | Zweck |
+|---|---|
+| `/` | Buch-Baukasten (Oberfläche) |
+| `/book?rules=all&modules=A\|B&adventures=C&pages=D&sheet=standard&fmt=a5&title=…` | Buch anfordern; aus dem Cache sofort als PDF, sonst Warteseite mit automatischem Download. Dieser Link ist teilbar. |
+| `/book?book=regelwerk&fmt=a4` | vordefiniertes Buch |
+| `/book?pages=Kampf` | einzelne Seite (Link „Diese Seite als Buch-PDF" im Wiki) |
+| `/api/catalog` | Katalog mit aufgelösten Kategorien |
+| `/api/jobs` (POST, gleiche Parameter) → `/api/jobs/{id}` → `/api/jobs/{id}/download` | Auftrag anlegen, Status abfragen, PDF laden |
+| `/healthz` | Lebenszeichen |
 
-### Example
-To generate a PDF containing "Begabungen", "Fähigkeiten", "Geistesblitzpunkte" and "Kategorie:Charaktererstellung" visit `http://localhost:3000/?title=Begabungen|F%C3%A4higkeiten|Geistesblitzpunkte|Kategorie:Charaktererstellung`.
+Grenzen: höchstens 40 Seiten pro Buch, 6 Aufträge pro Minute und IP, 2 gleichzeitige Renderings,
+nur Namensräume aus `allowedNamespaces` (Standard: Artikel und Kategorien).
 
-## Ports
+## Katalog
 
-Two ports are required to run this project.  
-* `publicPort` (default 3000), is the user-facing port used to receive HTTP requests and return the generated PDFs.
-* `parsoidPort` (default 8000), is exclusively used internally to communicate between parsoid and the HTTP server handling user requests.
+`catalog.default.json` enthält die Regelwerk-Reihenfolge, die Kategorien für Module und Abenteuer, die
+Charakterbögen und vordefinierte Bücher. Die Redaktion kann alles auf der Wiki-Seite
+`MediaWiki:Wikitopdf-catalog.json` überschreiben (gleiches Format, einzelne Schlüssel reichen). Die
+Seite wird alle zehn Minuten neu gelesen, `POST /api/catalog/refresh` erzwingt es sofort.
 
-To change ports, modify the associated value in `package.json` and run `npm install`. Ensure that `/index.js`, `/config.yaml` and `/node_modules/parsoid/config.yaml` are writable before running `npm install` - you can re-run this command as often as needed.  
-**If you need to change them at a later point, remember to run `npm install` again, after changing `package.json`.**
+## Betrieb
+
+```yaml
+# docker-compose.yml (Auszug)
+  wikitopdf:
+    build: ./wikitopdf
+    container_name: mediawiki_htbah_wikitopdf
+    restart: always
+    shm_size: 512m
+    environment:
+      - PUBLIC_BASE=/pdf
+      - PUBLIC_WIKI=https://howtobeahero.de
+    volumes:
+      - ./wikitopdf_data:/data
+    networks:
+      - web
+```
+
+```
+# Caddyfile (Auszug)
+handle_path /pdf/* {
+        reverse_proxy wikitopdf:3000
+}
+handle /pdf {
+        redir /pdf/ 302
+}
+```
+
+Umgebungsvariablen: `WIKI_API` (Standard `http://mediawiki/api.php`), `WIKI_INDEX`, `WIKI_HOST`,
+`PUBLIC_WIKI`, `PUBLIC_BASE`, `DATA_DIR`, `CATALOG_PAGE`, `PRERENDER_AT` (Standard `04:15`),
+`MAX_TITLES`, `CONCURRENCY`, `JOBS_PER_MINUTE`, `CACHE_MAX_BYTES`, `CACHE_MAX_AGE_DAYS`.
+
+Lokal entwickeln: `bun install && WIKI_API=https://howtobeahero.de/api.php WIKI_INDEX=https://howtobeahero.de/index.php CHROMIUM_PATH=/Applications/Chromium.app/Contents/MacOS/Chromium bun run dev`
+
+## Lizenz
+
+Code: GPL-3.0-or-later. Schriften: SIL Open Font License (siehe `template/fonts`). Wiki-Inhalte in den
+erzeugten PDFs: CC BY-NC-SA 4.0, jedes PDF trägt eine Lizenzseite mit den Quellen.

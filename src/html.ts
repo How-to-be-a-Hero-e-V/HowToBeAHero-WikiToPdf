@@ -162,8 +162,11 @@ window.__shrinkImages = async function (max) {
       const c = document.createElement("canvas");
       c.width = Math.round(im.naturalWidth * f); c.height = Math.round(im.naturalHeight * f);
       const ctx = c.getContext("2d"); ctx.imageSmoothingQuality = "high"; ctx.drawImage(im, 0, 0, c.width, c.height);
-      const jpeg = /\\.jpe?g($|\\?)/i.test(im.src);
-      im.src = jpeg ? c.toDataURL("image/jpeg", 0.85) : c.toDataURL("image/png");
+      // Ohne Transparenz als JPEG (deutlich kleiner), sonst PNG
+      const px = ctx.getImageData(0, 0, c.width, c.height).data;
+      let opaque = true;
+      for (let i = 3; i < px.length; i += 4) { if (px[i] < 255) { opaque = false; break; } }
+      im.src = opaque ? c.toDataURL("image/jpeg", 0.86) : c.toDataURL("image/png");
       await new Promise(r => { im.onload = im.onerror = r; });
     } catch (e) { console.warn("shrink failed", im.src, e); }
   }

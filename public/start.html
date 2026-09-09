@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Werkzeuge – How to be a Hero</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="app.css?v=5">
+</head>
+<body>
+<header class="top" id="kopf"></header>
+<p class="anmeldung" id="anmeldung"></p>
+<main>
+  <div class="karten">
+    <a class="karte c-green" href="buch">
+      <img src="assets/How_to_regelwerk.png" alt="">
+      <h2>Buch-Baukasten</h2>
+      <p>Regelwerk, Module und Abenteuer zu einem PDF zusammenklicken, in A4 oder A5, mit Charakterbogen hinten dran.</p>
+      <span class="mehr">Buch bauen →</span>
+    </a>
+    <a class="karte c-blue" href="bogen">
+      <img src="assets/How_to_charakter.png" alt="">
+      <h2>Charakterbogen</h2>
+      <p>Helden online ausfüllen oder auswürfeln, Portrait malen, speichern und für die Gruppe freigeben.</p>
+      <span class="mehr">Charakter bauen →</span>
+    </a>
+  </div>
+  <p class="startnote">Beides greift direkt auf das Wiki zu und ist immer auf dem aktuellen Stand. Die Inhalte stehen unter CC BY-NC-SA 4.0.</p>
+</main>
+<footer class="foot"><a id="wikilink" href="https://howtobeahero.de">Zurück zum Wiki</a></footer>
+<script type="module">
+  import { $, kopfleiste, anmeldeleiste } from "./common.js";
+  $("#kopf").innerHTML = kopfleiste("", "Werkzeuge", "Zwei Helfer für den Spieltisch: das Buch zum Nachschlagen und den Charakterbogen zum Ausfüllen.");
+  anmeldeleiste($("#anmeldung"));
+</script>
+</body>
+</html>

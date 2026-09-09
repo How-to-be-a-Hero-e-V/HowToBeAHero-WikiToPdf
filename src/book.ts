@@ -13,7 +13,8 @@ export interface BookSpec {
   modules: string[];
   adventures: string[];
   pages: string[];       // freie Seiten
-  sheet: string | null;  // Sheet-ID
+  sheet: string | null;  // leere Vorlage
+  boegen: string[];      // gespeicherte Charakterbögen
 }
 
 const splitList = (s: string | null) => (s ?? "").split("|").map(t => t.trim().replace(/_/g, " ")).filter(Boolean);
@@ -21,7 +22,7 @@ const splitList = (s: string | null) => (s ?? "").split("|").map(t => t.trim().r
 // Baut aus Query-Parametern eine Buchdefinition; vordefinierte Buecher (?book=regelwerk) werden aufgeloest.
 export async function specFromQuery(q: URLSearchParams): Promise<BookSpec> {
   const cat = await loadCatalog();
-  let spec: BookSpec = { title: "", fmt: "a4", rules: [], modules: [], adventures: [], pages: [], sheet: null };
+  let spec: BookSpec = { title: "", fmt: "a4", rules: [], modules: [], adventures: [], pages: [], sheet: null, boegen: [] };
   const bookId = q.get("book");
   if (bookId) {
     const def = cat.books[bookId];
@@ -36,6 +37,7 @@ export async function specFromQuery(q: URLSearchParams): Promise<BookSpec> {
   if (q.has("adventures")) spec.adventures = splitList(q.get("adventures"));
   if (q.has("pages")) spec.pages = splitList(q.get("pages"));
   if (q.has("sheet")) spec.sheet = q.get("sheet") || null;
+  if (q.has("boegen")) spec.boegen = (q.get("boegen") ?? "").split("|").map((s) => s.trim()).filter((s) => /^[A-Za-z0-9]{4,24}$/.test(s)).slice(0, 12);
   if (q.get("fmt") === "a5") spec.fmt = "a5";
   if (q.get("title")) spec.title = q.get("title")!.slice(0, 80);
   // Regelwerk immer in Katalogreihenfolge
@@ -57,6 +59,7 @@ function defaultTitle(spec: BookSpec, cat: Catalog): string {
   if (spec.modules.length) parts.push(spec.modules.length === 1 ? spec.modules[0] : `${spec.modules.length} Module`);
   if (spec.adventures.length) parts.push(spec.adventures.length === 1 ? spec.adventures[0] : `${spec.adventures.length} Abenteuer`);
   if (spec.pages.length) parts.push(spec.pages.length === 1 ? spec.pages[0] : `${spec.pages.length} Seiten`);
+  if (spec.boegen.length) parts.push(spec.boegen.length === 1 ? "1 Charakterbogen" : `${spec.boegen.length} Charakterbögen`);
   if (!parts.length && spec.sheet) parts.push("Charakterbogen");
   return parts.join(" · ");
 }
@@ -69,6 +72,7 @@ export function specToQuery(spec: BookSpec, allChapters: string[] = []): string 
   if (spec.adventures.length) q.set("adventures", spec.adventures.join("|"));
   if (spec.pages.length) q.set("pages", spec.pages.join("|"));
   if (spec.sheet) q.set("sheet", spec.sheet);
+  if (spec.boegen.length) q.set("boegen", spec.boegen.join("|"));
   q.set("fmt", spec.fmt);
   q.set("title", spec.title);
   return q.toString();
@@ -76,10 +80,10 @@ export function specToQuery(spec: BookSpec, allChapters: string[] = []): string 
 
 export class HttpError extends Error { constructor(public status: number, msg: string) { super(msg); } }
 
-interface Resolved { spec: BookSpec; key: string; parts: { id: string; name: string; chapters: { id: string; title: string; wikiTitle: string; revid: number }[] }[]; sheetFile?: string; sheetName?: string }
+interface Resolved { spec: BookSpec; key: string; parts: { id: string; name: string; chapters: { id: string; title: string; wikiTitle: string; revid: number }[] }[]; sheetFile?: string; sheetName?: string; boegen: { id: string; titel: string; geaendert: string }[]; privat: boolean }
 
 // Titel pruefen, Revisionen holen, Cache-Schluessel bilden.
-export async function resolve(spec: BookSpec): Promise<Resolved> {
+export async function resolve(spec: BookSpec, nutzer?: { id: number; gruppen: string[] } | null): Promise<Resolved> {
   const cat = await loadCatalog();
   const groups: { id: string; name: string; titles: string[] }[] = [
     { id: "regelwerk", name: cat.rulebook.name, titles: spec.rules },
@@ -107,9 +111,24 @@ export async function resolve(spec: BookSpec): Promise<Resolved> {
   })).filter(p => p.chapters.length);
   if (missing.length) throw new HttpError(404, `Seite nicht gefunden: ${missing.join(", ")}`);
   const sheet = spec.sheet ? cat.sheets.find(s => s.id === spec.sheet) : undefined;
-  const keySrc = JSON.stringify({ v: cfg.templateVersion, t: spec.title, f: spec.fmt, s: sheet?.file ?? null, p: parts.map(p => [p.name, p.chapters.map(c => [c.wikiTitle, c.revid])]) });
+  // Charakterbögen: eigene immer, freigegebene für angemeldete Nutzer, alles für Admins
+  const store = await import("./store");
+  const boegen: { id: string; titel: string; geaendert: string }[] = [];
+  let privat = false;
+  const admin = !!nutzer && (nutzer.gruppen.includes("sysop") || nutzer.gruppen.includes("bureaucrat"));
+  for (const id of spec.boegen) {
+    const b = store.hole(id);
+    if (!b) throw new HttpError(404, "Ein ausgewählter Charakterbogen wurde nicht gefunden.");
+    const eigen = !!nutzer && b.besitzer_id === nutzer.id;
+    const gezielt = !!nutzer && store.istFreigegebenFuer(b.id, nutzer.id);
+    if (!eigen && !admin && !gezielt && !(b.freigegeben && nutzer)) throw new HttpError(403, `Der Charakterbogen „${b.titel}“ ist nicht für dich freigegeben.`);
+    if (!b.freigegeben) privat = true;
+    boegen.push({ id: b.id, titel: b.titel, geaendert: b.geaendert });
+  }
+  const keySrc = JSON.stringify({ v: cfg.templateVersion, t: spec.title, f: spec.fmt, s: sheet?.file ?? null,
+    b: boegen.map(b => [b.id, b.geaendert]), p: parts.map(p => [p.name, p.chapters.map(c => [c.wikiTitle, c.revid])]) });
   const key = new Bun.CryptoHasher("sha256").update(keySrc).digest("hex").slice(0, 32);
-  return { spec, key, parts, sheetFile: sheet?.file, sheetName: sheet?.name };
+  return { spec, key, parts, sheetFile: sheet?.file, sheetName: sheet?.name, boegen, privat };
 }
 
 export type Progress = (msg: string) => void;
@@ -140,6 +159,7 @@ export async function debugHtml(spec: BookSpec): Promise<string> {
 export async function buildBook(r: Resolved, progress: Progress = () => {}): Promise<{ path: string; cached: boolean }> {
   const hit = await cacheGet(r.key);
   if (hit) return { path: hit, cached: true };
+  const cat = await loadCatalog();
   const book = await assemble(r, progress);
   const total = book.parts.reduce((a, p) => a + p.chapters.length, 0);
   progress("Setze das Buch …");
@@ -147,8 +167,21 @@ export async function buildBook(r: Resolved, progress: Progress = () => {}): Pro
   const res = await renderPdf(html);
   console.log(`Render: ${res.pages} Seiten in ${res.ms} ms (${r.spec.fmt}, ${total} Kapitel)`);
   let sheet: Uint8Array | undefined;
-  if (r.sheetFile) { progress("Hänge Charakterbogen an …"); sheet = await fetchFile(r.sheetFile); }
-  const final = await finalizeBook(res.pdf, { title: r.spec.title, sheet, sheetName: r.sheetFile });
+  if (r.sheetFile) { progress("Hänge leeren Charakterbogen an …"); sheet = await fetchFile(r.sheetFile); }
+  const boegenPdf: Uint8Array[] = [];
+  if (r.boegen.length) {
+    const store = await import("./store");
+    const { bogenPdf } = await import("./sheet");
+    for (const b of r.boegen) {
+      progress(`Charakterbogen „${b.titel}" wird gesetzt …`);
+      const roh = store.hole(b.id);
+      if (!roh) continue;
+      const p = store.holePortrait(b.id);
+      const design = cat.sheets.find((s) => s.id === roh.design) ?? cat.sheets[0];
+      boegenPdf.push(await bogenPdf(JSON.parse(roh.daten), design, p?.portrait ? { bytes: p.portrait, typ: p.portrait_typ ?? "image/png" } : null));
+    }
+  }
+  const final = await finalizeBook(res.pdf, { title: r.spec.title, sheet, sheetName: r.sheetFile, boegen: boegenPdf });
   const path = await cachePut(r.key, final);
   return { path, cached: false };
 }

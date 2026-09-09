@@ -1,6 +1,7 @@
+import { BASE as base, $, esc as escape2, kopfleiste, anmeldeleiste, api } from "./common.js";
+$("#kopf").innerHTML = kopfleiste("buch", "Buch-Baukasten", "Regelwerk, Module, Abenteuer und Charakterbogen: Klick dir zusammen, was deine Runde braucht, und nimm es als PDF mit an den Spieltisch.");
+const me = await anmeldeleiste($("#anmeldung"));
 (async function () {
-  const $ = s => document.querySelector(s);
-  const base = location.pathname.replace(/\/(index\.html)?$/, "");
   const cat = await (await fetch(base + "/api/catalog")).json();
   $("#loading").hidden = true; $("#form").hidden = false;
   $("#wikilink").href = cat.wiki;
@@ -14,6 +15,16 @@
   }
   $("#sheets").innerHTML = `<label class="item sel"><input type="radio" name="sheet" value="" checked><span><b>Kein Charakterbogen</b></span></label>` +
     cat.sheets.map(s => `<label class="item"><input type="radio" name="sheet" value="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="desc">${esc(s.description || "")}</span></span></label>`).join("");
+
+  // Gespeicherte Charakterbögen zum Mitnehmen ins Buch
+  try {
+    const { eigene, fuerMich, freigegeben } = await api("/api/boegen");
+    const alle = [...(eigene ?? []), ...(fuerMich ?? []), ...(freigegeben ?? [])];
+    $("#eigenebogen").innerHTML = alle.length
+      ? alle.map(b => `<label class="item"><input type="checkbox" name="boegen" value="${escape2(b.id)}">` +
+          `<span><b>${escape2(b.titel)}</b><span class="desc">${escape2(b.besitzer)}${b.eigener ? " · eigener" : ""}</span></span></label>`).join("")
+      : `<p class="hinweis">${me.angemeldet ? "Noch keine gespeicherten Bögen. Leg im Charakterbogen-Editor einen an." : "Melde dich im Wiki an, dann kannst du hier eigene und freigegebene Bögen mitnehmen."}</p>`;
+  } catch { $("#eigenebogen").innerHTML = ""; }
 
   // Vorbelegung aus der URL (geteilte Links)
   const q = new URLSearchParams(location.search);
@@ -55,14 +66,19 @@
     if (pages.length) p.set("pages", pages.join("|"));
     const sheet = document.querySelector("input[name=sheet]:checked").value;
     if (sheet) p.set("sheet", sheet);
+    const boegen = vals("boegen");
+    if (boegen.length) p.set("boegen", boegen.join("|"));
     p.set("fmt", document.querySelector("input[name=fmt]:checked").value);
     if ($("#title").value.trim()) p.set("title", $("#title").value.trim());
-    return { p, count: rules.length + modules.length + adventures.length + pages.length, sheet };
+    return { p, count: rules.length + modules.length + adventures.length + pages.length, sheet, boegen };
   }
   function update() {
-    const { count, sheet } = collect();
-    $("#summary").textContent = count ? `${count} Seite${count === 1 ? "" : "n"} ausgewählt${sheet ? " plus Charakterbogen" : ""}${count > cat.maxTitles ? ` – höchstens ${cat.maxTitles} möglich` : ""}.` : (sheet ? "Nur der Charakterbogen." : "Noch nichts ausgewählt.");
-    $("#go").disabled = (!count && !sheet) || count > cat.maxTitles;
+    const { count, sheet, boegen } = collect();
+    const zusatz = [sheet ? "leerer Bogen" : "", boegen.length ? `${boegen.length} Charakterbogen${boegen.length === 1 ? "" : "\u00f6gen"}` : ""].filter(Boolean).join(" und ");
+    $("#summary").textContent = count
+      ? `${count} Seite${count === 1 ? "" : "n"} ausgewählt${zusatz ? ` plus ${zusatz}` : ""}${count > cat.maxTitles ? ` – höchstens ${cat.maxTitles} möglich` : ""}.`
+      : (zusatz ? `Nur ${zusatz}.` : "Noch nichts ausgewählt.");
+    $("#go").disabled = (!count && !sheet && !boegen.length) || count > cat.maxTitles;
   }
   update();
 
@@ -103,5 +119,5 @@
       $("#status").textContent = "Fehler: " + err.message; $("#bar").hidden = true; $("#go").disabled = false;
     }
   });
-  function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+  function esc(s) { return escape2(s); }
 })();

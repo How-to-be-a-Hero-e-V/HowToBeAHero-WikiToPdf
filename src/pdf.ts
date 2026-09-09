@@ -48,13 +48,21 @@ export async function appendForm(book: PDFDocument, sheetBytes: Uint8Array) {
   if (calc.length) acro.set(PDFName.of("CO"), book.context.obj(calc));
 }
 
-export async function finalizeBook(pdfBytes: Uint8Array, opts: { title: string; sheet?: Uint8Array; sheetName?: string }): Promise<Uint8Array> {
+/** Fertige Charakterbögen anhängen: reine Seiten, damit sich Formularfelder nicht überlagern. */
+export async function appendPages(book: PDFDocument, bytes: Uint8Array) {
+  const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+  const pages = await book.copyPages(src, src.getPageIndices());
+  pages.forEach((p) => book.addPage(p));
+}
+
+export async function finalizeBook(pdfBytes: Uint8Array, opts: { title: string; sheet?: Uint8Array; sheetName?: string; boegen?: Uint8Array[] }): Promise<Uint8Array> {
   const book = await PDFDocument.load(pdfBytes);
   if (opts.sheet) {
     await appendForm(book, opts.sheet);
     // Original zusaetzlich als Anhang, falls ein Viewer die Felder im Buch nicht anzeigt
     await book.attach(opts.sheet, opts.sheetName ?? "Charakterbogen.pdf", { mimeType: "application/pdf", description: "Charakterbogen (ausfüllbar)" });
   }
+  for (const b of opts.boegen ?? []) await appendPages(book, b);
   book.setTitle(opts.title);
   book.setAuthor("How to be a Hero e. V. und die Wiki-Community");
   book.setProducer("HTBAH WikiToPdf 2");

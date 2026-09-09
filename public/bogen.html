@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Charakterbogen – How to be a Hero</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="app.css?v=5">
+</head>
+<body>
+<header class="top" id="kopf"></header>
+<p class="anmeldung" id="anmeldung"></p>
+
+<main id="app">
+  <p id="loading">Wird geladen …</p>
+  <form id="form" hidden>
+    <section class="block c-green">
+      <h2><img class="badge" src="assets/How_to_charakter.png" alt="" style="height:26px">1. Der Charakter
+        <small><button type="button" class="linkbtn" id="zufall">🎲 Zufällig ausfüllen</button></small>
+      </h2>
+      <div class="inner kopfdaten">
+        <div class="felder">
+          <label>Name <input type="text" id="f-name" maxlength="60" placeholder="Wie heißt dein Held?"></label>
+          <label>Geschlecht <input type="text" id="f-geschlecht" maxlength="40"></label>
+          <label>Alter <input type="text" id="f-alter" maxlength="12"></label>
+          <label>Lebenspunkte <input type="text" id="f-lebenspunkte" maxlength="8" value="100"></label>
+          <label>Statur <input type="text" id="f-statur" maxlength="40"></label>
+          <label>Religion <input type="text" id="f-religion" maxlength="40"></label>
+          <label>Beruf <input type="text" id="f-beruf" maxlength="60"></label>
+          <label>Familienstand <input type="text" id="f-familienstand" maxlength="40"></label>
+        </div>
+        <div class="portrait">
+          <div class="portrait-bild" id="portrait-bild"><span>kein Portrait</span></div>
+          <div class="portrait-knoepfe">
+            <button type="button" class="btn klein" id="portrait-malen">Malen</button>
+            <button type="button" class="btn klein secondary" id="portrait-laden">Bild hochladen</button>
+            <button type="button" class="btn klein secondary" id="portrait-weg" hidden>Entfernen</button>
+            <input type="file" id="portrait-datei" accept="image/*" hidden>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block c-blue">
+      <h2><img class="badge" src="assets/Howky_geistesblitz.png" alt="">2. Fähigkeiten
+        <small><span id="punktestand"></span></small>
+      </h2>
+      <div class="inner gruppen" id="gruppen"></div>
+      <p class="hinweis" id="warnungen"></p>
+    </section>
+
+    <section class="block c-orange">
+      <h2><img class="badge" src="assets/Stift.png" alt="">3. Ausrüstung und Notizen</h2>
+      <div class="inner zwei">
+        <label>Inventar <textarea id="f-inventar" rows="4" maxlength="900"></textarea></label>
+        <label>Anmerkungen <textarea id="f-anmerkungen" rows="4" maxlength="900"></textarea></label>
+      </div>
+    </section>
+
+    <section class="block c-blue">
+      <h2><img class="badge" src="assets/How_to_regelwerk.png" alt="">4. Bogen und Ausgabe</h2>
+      <div class="inner">
+        <div class="grid sheets" id="designs"></div>
+        <div class="aktionen">
+          <label class="own titel">Titel <input type="text" id="f-titel" maxlength="80" placeholder="wie der Name, wenn leer"></label>
+          <label class="own titel">Für diese Nutzer freigeben (Wiki-Benutzernamen, mit Komma getrennt)
+            <input type="text" id="f-freigabe" maxlength="400" placeholder="z. B. TheGamer93, Blackcat2447">
+          </label>
+          <label class="radio frei"><input type="checkbox" id="f-frei"> <b>Zusätzlich für alle angemeldeten Nutzer</b> <span>sonst sehen ihn nur die oben genannten</span></label>
+          <div class="knopfreihe">
+            <button type="submit" class="btn" id="speichern">Speichern</button>
+            <button type="button" class="btn secondary" id="pdf">PDF herunterladen</button>
+            <button type="button" class="btn secondary" id="neu">Neuer Bogen</button>
+          </div>
+          <p id="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block c-red">
+      <h2><img class="badge" src="assets/Howky_lesen.png" alt="">5. Gespeicherte Bögen</h2>
+      <div class="inner">
+        <h3 class="listenkopf">Meine Bögen</h3>
+        <div id="liste-eigene" class="bogenliste"></div>
+        <h3 class="listenkopf">Für mich freigegeben</h3>
+        <div id="liste-fremd" class="bogenliste"></div>
+      </div>
+    </section>
+  </form>
+</main>
+
+<div class="modal" id="malmodal" hidden>
+  <div class="modal-inner">
+    <div class="modal-kopf"><strong>Portrait malen</strong>
+      <span><button type="button" class="btn klein" id="mal-ok">Übernehmen</button>
+      <button type="button" class="btn klein secondary" id="mal-abbruch">Abbrechen</button></span>
+    </div>
+    <div id="malhost"></div>
+  </div>
+</div>
+
+<footer class="foot">Die Werte folgen dem Regelwerk: 400 Fähigkeitspunkte, Begabung ist die Summe der Gruppe geteilt durch 10, der Begabungswert kommt auf jede Fähigkeit obendrauf. <a id="wikilink" href="https://howtobeahero.de">Zurück zum Wiki</a></footer>
+<script type="module" src="bogen.js?v=5"></script>
+</body>
+</html>

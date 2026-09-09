@@ -9,6 +9,7 @@
     "dev": "bun --watch src/server.ts"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
     "node-html-parser": "6.1.13",
     "pagedjs": "0.4.3",
     "pdf-lib": "1.17.1",

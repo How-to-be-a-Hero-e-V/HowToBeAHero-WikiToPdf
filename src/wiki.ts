@@ -102,6 +102,20 @@ export async function thumbUrls(names: string[], width: number): Promise<Map<str
   return out;
 }
 
+/** Wiki-Benutzernamen zu IDs auflösen; unbekannte Namen kommen als fehlend zurück. */
+export async function nutzerIds(namen: string[]): Promise<{ gefunden: { nutzer_id: number; nutzer_name: string }[]; fehlend: string[] }> {
+  const sauber = [...new Set(namen.map((n) => n.trim()).filter(Boolean))].slice(0, 30);
+  if (!sauber.length) return { gefunden: [], fehlend: [] };
+  const j = await api({ action: "query", list: "users", ususers: sauber.join("|") });
+  const gefunden: { nutzer_id: number; nutzer_name: string }[] = [];
+  const fehlend: string[] = [];
+  for (const u of j.query?.users ?? []) {
+    if (u.userid && !u.missing && !u.invalid) gefunden.push({ nutzer_id: u.userid, nutzer_name: u.name });
+    else fehlend.push(u.name ?? u.user ?? "?");
+  }
+  return { gefunden, fehlend };
+}
+
 export async function rawPage(title: string): Promise<string | null> {
   const u = new URL(cfg.wikiIndex);
   u.searchParams.set("title", title);

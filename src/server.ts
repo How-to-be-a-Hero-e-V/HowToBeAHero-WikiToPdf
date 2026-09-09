@@ -2,6 +2,9 @@ import { cfg } from "./config";
 import { specFromQuery, specToQuery, fileName, HttpError, resolve } from "./book";
 import { resolvedCatalog, loadCatalog, invalidateCatalog } from "./catalog";
 import * as jobs from "./jobs";
+import { sheetRoutes } from "./sheetapi";
+import { nutzerVonRequest } from "./auth";
+import { sichere } from "./store";
 import { join } from "node:path";
 
 const pub = join(import.meta.dir, "..", "public");
@@ -39,17 +42,24 @@ async function handle(req: Request, server: any): Promise<Response> {
   if (req.method !== "GET" && req.method !== "POST" && req.method !== "HEAD") return text("Method not allowed", 405);
 
   if (path === "/healthz") return text("ok");
-  if (path === "/" || path === "/index.html") return new Response(Bun.file(join(pub, "index.html")), { headers: { "content-type": "text/html; charset=utf-8" } });
-  if (path === "/app.js" || path === "/app.css") return new Response(Bun.file(join(pub, path.slice(1))), { headers: { "cache-control": "public, max-age=300" } });
+  const seiten: Record<string, string> = { "/": "start.html", "/index.html": "start.html", "/buch": "buch.html", "/buch/": "buch.html", "/bogen": "bogen.html", "/bogen/": "bogen.html" };
+  if (seiten[path]) return new Response(Bun.file(join(pub, seiten[path])), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache" } });
+  if (/^\/[a-z0-9._-]+\.(js|css)$/.test(path)) {
+    const f = Bun.file(join(pub, path.slice(1)));
+    if (await f.exists()) return new Response(f, { headers: { "content-type": path.endsWith(".css") ? "text/css; charset=utf-8" : "text/javascript; charset=utf-8", "cache-control": "public, max-age=300" } });
+  }
   if (/^\/assets\/[\w./-]+$/.test(path) && !path.includes("..")) {
     const f = Bun.file(join(pub, path.slice(1)));
     if (await f.exists()) return new Response(f, { headers: { "cache-control": "public, max-age=86400" } });
   }
   if (path === "/logo.png") return new Response(Bun.file(join(import.meta.dir, "..", "template/images/LogoHD_300dpi.png")), { headers: { "cache-control": "public, max-age=86400" } });
 
+  const bogen = await sheetRoutes(path, req, url);
+  if (bogen) return bogen;
+
   if (path === "/api/catalog") {
     const c = await resolvedCatalog();
-    return json({ rulebook: c.rulebook, modules: c.modules, adventures: c.adventures, sheets: c.sheets, books: c.books, maxTitles: cfg.maxTitles, base: cfg.publicBase, wiki: cfg.publicWiki });
+    return json({ rulebook: c.rulebook, modules: c.modules, adventures: c.adventures, sheets: c.sheets, books: c.books, randomizer: (c as any).randomizer ?? null, maxTitles: cfg.maxTitles, base: cfg.publicBase, wiki: cfg.publicWiki });
   }
   if (path === "/api/catalog/refresh" && req.method === "POST") { invalidateCatalog(); return json({ ok: true }); }
 
@@ -63,13 +73,14 @@ async function handle(req: Request, server: any): Promise<Response> {
   if (path === "/book" || path === "/api/jobs") {
     const q = req.method === "POST" ? new URLSearchParams(await req.text()) : url.searchParams;
     const spec = await specFromQuery(q);
-    const r = await resolve(spec);
+    const nutzer = await nutzerVonRequest(req);
+    const r = await resolve(spec, nutzer);
     const name = fileName(spec);
     const shareUrl = `${cfg.publicWiki}${cfg.publicBase}/book?${specToQuery(spec, (await loadCatalog()).rulebook.chapters)}`;
     const hit = await (await import("./cache")).cacheGet(r.key);
     if (hit && path === "/book") return pdfResponse(hit, name, q.get("dl") === "1");
     if (!jobs.allow(ipOf(req, server))) return text("Zu viele Anfragen, bitte in einer Minute noch einmal.", 429);
-    const job = await jobs.submit(spec);
+    const job = await jobs.submit(spec, nutzer);
     if (path === "/api/jobs") return json({ id: job.id, state: job.state, message: job.message, share: shareUrl, file: name });
     return waitPage(job, shareUrl);
   }
@@ -79,6 +90,10 @@ async function handle(req: Request, server: any): Promise<Response> {
     if (!job) return json({ error: "Auftrag unbekannt oder abgelaufen" }, 404);
     if (m[2]) {
       if (job.state !== "done" || !job.path) return json({ error: "Noch nicht fertig" }, 409);
+      if (job.besitzer) {
+        const wer = await nutzerVonRequest(req);
+        if (!wer || wer.id !== job.besitzer) return json({ error: "Dieses Buch enthält nicht freigegebene Charakterbögen." }, 403);
+      }
       return pdfResponse(job.path, fileName(job.spec), true);
     }
     return json({ id: job.id, state: job.state, message: job.message, error: job.error });
@@ -92,11 +107,12 @@ async function prerender() {
   for (const id of Object.keys(cat.books)) for (const fmt of ["a4", "a5"]) {
     try {
       const spec = await specFromQuery(new URLSearchParams({ book: id, fmt }));
-      const job = await jobs.submit(spec);
+      const job = await jobs.submit(spec, null);
       while (job.state === "queued" || job.state === "running") await Bun.sleep(1000);
       console.log(`Vorrendern ${id}/${fmt}: ${job.state === "done" ? job.message : "Fehler: " + job.error}`);
     } catch (e) { console.error(`Vorrendern ${id}/${fmt} fehlgeschlagen:`, String(e)); }
   }
+  sichere();
 }
 function scheduleDaily() {
   const [h, m] = cfg.prerenderAt.split(":").map(Number);

@@ -21,30 +21,730 @@
   "modules": {
     "name": "Module",
     "groups": [
-      { "id": "official", "name": "Offizielle Module", "category": "Offizielle Module" },
-      { "id": "confirmed", "name": "Bestätigte Module", "category": "Bestätigte Module" },
-      { "id": "wild", "name": "\"Wilde\" Module", "category": "\"Wilde\" Module" }
+      {
+        "id": "official",
+        "name": "Offizielle Module",
+        "category": "Offizielle Module"
+      },
+      {
+        "id": "confirmed",
+        "name": "Bestätigte Module",
+        "category": "Bestätigte Module"
+      },
+      {
+        "id": "wild",
+        "name": "\"Wilde\" Module",
+        "category": "\"Wilde\" Module"
+      }
     ]
   },
   "adventures": {
     "name": "Abenteuer",
     "groups": [
-      { "id": "official", "name": "Offizielle Abenteuer", "category": "Offizielle Abenteuer" },
-      { "id": "confirmed", "name": "Bestätigte Abenteuer", "category": "Bestätigte Abenteuer" },
-      { "id": "onepage", "name": "One Page Adventures", "category": "One Page Adventures" },
-      { "id": "wild", "name": "\"Wilde\" Abenteuer", "category": "\"Wilde\" Abenteuer" }
+      {
+        "id": "official",
+        "name": "Offizielle Abenteuer",
+        "category": "Offizielle Abenteuer"
+      },
+      {
+        "id": "confirmed",
+        "name": "Bestätigte Abenteuer",
+        "category": "Bestätigte Abenteuer"
+      },
+      {
+        "id": "onepage",
+        "name": "One Page Adventures",
+        "category": "One Page Adventures"
+      },
+      {
+        "id": "wild",
+        "name": "\"Wilde\" Abenteuer",
+        "category": "\"Wilde\" Abenteuer"
+      }
     ]
   },
   "sheets": [
-    { "id": "standard", "name": "Standardbogen", "file": "How_to_be_a_Hero_Charakterbogen.pdf", "description": "Der offizielle Charakterbogen, ausfüllbar am Rechner." },
-    { "id": "hero", "name": "Hero-Design", "file": "HTBAH_Charakterbogen_Hero-Design.pdf", "description": "Bunte Variante im Hero-Look, ausfüllbar." },
-    { "id": "grau", "name": "Graustufen", "file": "HTBAH_Charakterbogen_v5_graustufen.pdf", "description": "Druckerfreundlich in Graustufen, ausfüllbar." },
-    { "id": "dysomnia", "name": "Dysomnia", "file": "Dysomnia_Charakterbogen.pdf", "description": "Setting-Bogen für Dysomnia." },
-    { "id": "schwarzertod", "name": "Der Schwarze Tod", "file": "SchwarzerTod_Charakterbogen.pdf", "description": "Setting-Bogen für Der Schwarze Tod." }
+    {
+      "id": "standard",
+      "name": "Standardbogen",
+      "file": "How_to_be_a_Hero_Charakterbogen.pdf",
+      "description": "Der offizielle Charakterbogen, ausfüllbar am Rechner."
+    },
+    {
+      "id": "hero",
+      "name": "Hero-Design",
+      "file": "HTBAH_Charakterbogen_Hero-Design.pdf",
+      "description": "Bunte Variante im Hero-Look, ausfüllbar."
+    },
+    {
+      "id": "grau",
+      "name": "Graustufen",
+      "file": "HTBAH_Charakterbogen_v5_graustufen.pdf",
+      "description": "Druckerfreundlich in Graustufen, ausfüllbar."
+    },
+    {
+      "id": "dysomnia",
+      "name": "Dysomnia",
+      "file": "Dysomnia_Charakterbogen.pdf",
+      "description": "Setting-Bogen für Dysomnia."
+    },
+    {
+      "id": "schwarzertod",
+      "name": "Der Schwarze Tod",
+      "file": "SchwarzerTod_Charakterbogen.pdf",
+      "description": "Setting-Bogen für Der Schwarze Tod."
+    },
+    {
+      "id": "standard_en",
+      "name": "Standard (English)",
+      "file": "How_to_be_a_Hero_Charakterbogen_en.pdf",
+      "description": "The official sheet in English."
+    }
   ],
   "books": {
-    "regelwerk": { "title": "Regelwerk", "rules": "all", "sheet": "standard" }
+    "regelwerk": {
+      "title": "Regelwerk",
+      "rules": "all",
+      "sheet": "standard"
+    }
   },
-  "allowedNamespaces": [0, 14],
-  "badgeFiles": ["Offiziell_klein.png", "Bestaetigt_klein.png", "Wild_klein.png"]
+  "allowedNamespaces": [
+    0,
+    14
+  ],
+  "badgeFiles": [
+    "Offiziell_klein.png",
+    "Bestaetigt_klein.png",
+    "Wild_klein.png"
+  ],
+  "randomizer": {
+    "geschlechter": [
+      "weiblich",
+      "männlich",
+      "divers"
+    ],
+    "vornamen": {
+      "weiblich": [
+        "Agnes",
+        "Bärbel",
+        "Cordula",
+        "Elif",
+        "Frieda",
+        "Grete",
+        "Hilde",
+        "Ida",
+        "Jutta",
+        "Käthe",
+        "Lene",
+        "Marlen",
+        "Nele",
+        "Ottilie",
+        "Pia",
+        "Roswitha",
+        "Silke",
+        "Thea",
+        "Ulla",
+        "Wanda",
+        "Yara",
+        "Zora"
+      ],
+      "männlich": [
+        "Anselm",
+        "Bernd",
+        "Cord",
+        "Detlev",
+        "Emil",
+        "Ferdi",
+        "Gorich",
+        "Hartmut",
+        "Ingo",
+        "Jockel",
+        "Klaas",
+        "Ludolf",
+        "Momme",
+        "Norbert",
+        "Onno",
+        "Piet",
+        "Quirin",
+        "Rudi",
+        "Sven",
+        "Til",
+        "Uwe",
+        "Volker",
+        "Wendelin"
+      ],
+      "divers": [
+        "Ari",
+        "Bo",
+        "Charlie",
+        "Eike",
+        "Finn",
+        "Jona",
+        "Kim",
+        "Luca",
+        "Mika",
+        "Noa",
+        "Robin",
+        "Sascha",
+        "Toni",
+        "Vale"
+      ]
+    },
+    "nachnamen": [
+      "Achterberg",
+      "Bornhöft",
+      "Cramer",
+      "Dettmer",
+      "Eggers",
+      "Fahrenkrog",
+      "Gerdes",
+      "Habermann",
+      "Isenberg",
+      "Jansen",
+      "Kohlmeyer",
+      "Lührs",
+      "Möhlmann",
+      "Nordmann",
+      "Oltmanns",
+      "Pfahl",
+      "Quast",
+      "Reimers",
+      "Schlüter",
+      "Tiedemann",
+      "Uphoff",
+      "Vogtherr",
+      "Wemhoff",
+      "Zurhorst"
+    ],
+    "statur": [
+      "hager",
+      "schmal",
+      "drahtig",
+      "kräftig",
+      "stämmig",
+      "hünenhaft",
+      "klein",
+      "hochgewachsen",
+      "rundlich",
+      "sehnig"
+    ],
+    "religion": [
+      "keine",
+      "volkstümlich",
+      "streng gläubig",
+      "abergläubisch",
+      "Zweifler",
+      "eigene Auslegung",
+      "Naturglaube",
+      "Ahnenkult"
+    ],
+    "familienstand": [
+      "ledig",
+      "verheiratet",
+      "verwitwet",
+      "getrennt",
+      "verlobt",
+      "es ist kompliziert"
+    ],
+    "eigenheiten": [
+      "Redet im Schlaf und verrät dabei mehr als beabsichtigt.",
+      "Sammelt Knöpfe, ohne sagen zu können warum.",
+      "Trinkt Tee nur aus der eigenen Tasse.",
+      "Kann keinen Streit vorbeiziehen lassen.",
+      "Merkt sich Gesichter, aber nie Namen.",
+      "Pfeift immer dieselbe Melodie.",
+      "Zählt heimlich alles ab.",
+      "Vertraut Tieren mehr als Menschen.",
+      "Schuldet jemandem einen großen Gefallen.",
+      "Schläft nie zweimal am selben Ort.",
+      "Schreibt jeden Abend Tagebuch.",
+      "Hat Angst vor tiefem Wasser.",
+      "Verhandelt aus Gewohnheit über jeden Preis."
+    ],
+    "inventar": [
+      "Rucksack",
+      "Wasserschlauch",
+      "Feuerzeug",
+      "Seil (10 m)",
+      "Decke",
+      "Notizbuch",
+      "Taschenmesser",
+      "Verbandszeug",
+      "Wechselkleidung",
+      "Beutel Münzen",
+      "Kompass",
+      "Öllampe"
+    ],
+    "faehigkeiten": {
+      "handeln": [
+        "Klettern",
+        "Rennen",
+        "Schleichen",
+        "Schwimmen",
+        "Werfen",
+        "Verstecken",
+        "Heben",
+        "Kochen",
+        "Angeln",
+        "Schnitzen",
+        "Reiten",
+        "Fahren",
+        "Schlagen",
+        "Ausweichen",
+        "Balancieren",
+        "Schlösser knacken"
+      ],
+      "wissen": [
+        "Wahrnehmung",
+        "Spuren lesen",
+        "Mathematik",
+        "Geographie",
+        "Politik",
+        "Literatur",
+        "Flora",
+        "Fauna",
+        "Erste Hilfe",
+        "Geschichte",
+        "Recht",
+        "Handwerkskunde",
+        "Sprachen",
+        "Orientierung"
+      ],
+      "soziales": [
+        "Menschenkenntnis",
+        "Lügen",
+        "Feilschen",
+        "Überreden",
+        "Einschüchtern",
+        "Beruhigen",
+        "Unterhalten",
+        "Begeistern",
+        "Betören",
+        "Beeindrucken",
+        "Trösten",
+        "Ausfragen"
+      ]
+    },
+    "archetypen": [
+      {
+        "id": "kraeuter",
+        "name": "Kräuterkundige",
+        "berufe": [
+          "Kräuterhändlerin",
+          "Feldscher",
+          "Hebamme",
+          "Apotheker"
+        ],
+        "gewichte": {
+          "handeln": 1,
+          "wissen": 2.2,
+          "soziales": 1.2
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Kräuter sammeln",
+            "Schleichen",
+            "Klettern",
+            "Kochen"
+          ],
+          "wissen": [
+            "Pflanzenkunde",
+            "Heilkunde",
+            "Giftkunde",
+            "Anatomie",
+            "Latein"
+          ],
+          "soziales": [
+            "Beruhigen",
+            "Trösten",
+            "Feilschen"
+          ]
+        },
+        "inventar": [
+          "Mörser",
+          "Kräuterbeutel",
+          "Salbentiegel",
+          "Skalpell",
+          "Kräuterbuch"
+        ]
+      },
+      {
+        "id": "soeldner",
+        "name": "Söldnerin",
+        "berufe": [
+          "Söldner",
+          "Stadtwache",
+          "Leibwächterin",
+          "Fährtensucher"
+        ],
+        "gewichte": {
+          "handeln": 2.4,
+          "wissen": 1,
+          "soziales": 0.9
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Schwertkampf",
+            "Ausweichen",
+            "Parieren",
+            "Rennen",
+            "Heben",
+            "Reiten"
+          ],
+          "wissen": [
+            "Waffenkunde",
+            "Taktik",
+            "Erste Hilfe",
+            "Orientierung"
+          ],
+          "soziales": [
+            "Einschüchtern",
+            "Beeindrucken",
+            "Kommandieren"
+          ]
+        },
+        "inventar": [
+          "Kurzschwert",
+          "Lederrüstung",
+          "Wetzstein",
+          "Verbandszeug",
+          "Sold in Münzen"
+        ]
+      },
+      {
+        "id": "gelehrte",
+        "name": "Gelehrte",
+        "berufe": [
+          "Archivarin",
+          "Gelehrter",
+          "Lehrerin",
+          "Schreiber"
+        ],
+        "gewichte": {
+          "handeln": 0.7,
+          "wissen": 2.6,
+          "soziales": 1.1
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Schnitzen",
+            "Feinmotorik",
+            "Schreiben"
+          ],
+          "wissen": [
+            "Geschichte",
+            "Latein",
+            "Literatur",
+            "Recht",
+            "Sprachen",
+            "Astronomie",
+            "Mathematik"
+          ],
+          "soziales": [
+            "Vortragen",
+            "Ausfragen",
+            "Überreden"
+          ]
+        },
+        "inventar": [
+          "Federkiel und Tinte",
+          "Notizbuch",
+          "Lupe",
+          "Kerzenstumpf",
+          "Bücherbeutel"
+        ]
+      },
+      {
+        "id": "gauner",
+        "name": "Gauner",
+        "berufe": [
+          "Beutelschneider",
+          "Hehlerin",
+          "Schmuggler",
+          "Straßenkind"
+        ],
+        "gewichte": {
+          "handeln": 1.9,
+          "wissen": 1,
+          "soziales": 1.7
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Schleichen",
+            "Taschendiebstahl",
+            "Schlösser knacken",
+            "Klettern",
+            "Verstecken"
+          ],
+          "wissen": [
+            "Gassenwissen",
+            "Wahrnehmung",
+            "Wertschätzen"
+          ],
+          "soziales": [
+            "Lügen",
+            "Feilschen",
+            "Ablenken",
+            "Menschenkenntnis"
+          ]
+        },
+        "inventar": [
+          "Dietriche",
+          "Dunkler Mantel",
+          "Falsche Würfel",
+          "Zweiter Beutel",
+          "Kreidestücke"
+        ]
+      },
+      {
+        "id": "haendler",
+        "name": "Händlerin",
+        "berufe": [
+          "Kauffrau",
+          "Krämer",
+          "Marktschreierin",
+          "Fuhrmann"
+        ],
+        "gewichte": {
+          "handeln": 1,
+          "wissen": 1.5,
+          "soziales": 2.3
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Fahren",
+            "Heben",
+            "Reiten"
+          ],
+          "wissen": [
+            "Rechnen",
+            "Wertschätzen",
+            "Geographie",
+            "Recht"
+          ],
+          "soziales": [
+            "Feilschen",
+            "Überreden",
+            "Menschenkenntnis",
+            "Unterhalten",
+            "Beschwatzen"
+          ]
+        },
+        "inventar": [
+          "Waage",
+          "Kontobuch",
+          "Warenprobe",
+          "Geldkatze",
+          "Zollpapiere"
+        ]
+      },
+      {
+        "id": "jaeger",
+        "name": "Jägerin",
+        "berufe": [
+          "Wildhüterin",
+          "Fallensteller",
+          "Kundschafter",
+          "Fischer"
+        ],
+        "gewichte": {
+          "handeln": 2.2,
+          "wissen": 1.6,
+          "soziales": 0.7
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Bogenschießen",
+            "Schleichen",
+            "Fallen stellen",
+            "Klettern",
+            "Schwimmen"
+          ],
+          "wissen": [
+            "Spuren lesen",
+            "Fauna",
+            "Orientierung",
+            "Wetterkunde"
+          ],
+          "soziales": [
+            "Beruhigen",
+            "Schweigen"
+          ]
+        },
+        "inventar": [
+          "Bogen",
+          "Köcher",
+          "Fallen",
+          "Fell",
+          "Trockenfleisch"
+        ]
+      },
+      {
+        "id": "gaukler",
+        "name": "Gauklerin",
+        "berufe": [
+          "Schaustellerin",
+          "Musikant",
+          "Erzählerin",
+          "Schauspieler"
+        ],
+        "gewichte": {
+          "handeln": 1.6,
+          "wissen": 1,
+          "soziales": 2.4
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Jonglieren",
+            "Balancieren",
+            "Akrobatik",
+            "Taschenspielerei"
+          ],
+          "wissen": [
+            "Literatur",
+            "Geschichten",
+            "Sprachen"
+          ],
+          "soziales": [
+            "Unterhalten",
+            "Begeistern",
+            "Betören",
+            "Lügen",
+            "Beeindrucken"
+          ]
+        },
+        "inventar": [
+          "Laute",
+          "Bunter Mantel",
+          "Jonglierbälle",
+          "Schminktopf",
+          "Hut für Münzen"
+        ]
+      },
+      {
+        "id": "techniker",
+        "name": "Technikerin",
+        "berufe": [
+          "Mechanikerin",
+          "Ingenieur",
+          "Programmiererin",
+          "Bordtechniker"
+        ],
+        "gewichte": {
+          "handeln": 1.8,
+          "wissen": 2.2,
+          "soziales": 0.8
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Feinmechanik",
+            "Reparieren",
+            "Löten",
+            "Fahren"
+          ],
+          "wissen": [
+            "Programmieren",
+            "Elektronik",
+            "Physik",
+            "Mathematik",
+            "Systemkunde"
+          ],
+          "soziales": [
+            "Erklären",
+            "Verhandeln"
+          ]
+        },
+        "inventar": [
+          "Werkzeugrolle",
+          "Multimeter",
+          "Ersatzteile",
+          "Taschenlampe",
+          "Klebeband"
+        ]
+      },
+      {
+        "id": "ermittler",
+        "name": "Ermittler",
+        "berufe": [
+          "Kommissarin",
+          "Privatdetektiv",
+          "Reporterin",
+          "Versicherungsprüfer"
+        ],
+        "gewichte": {
+          "handeln": 1.2,
+          "wissen": 2.1,
+          "soziales": 1.7
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Beschatten",
+            "Rennen",
+            "Fahren"
+          ],
+          "wissen": [
+            "Wahrnehmung",
+            "Spurensicherung",
+            "Recht",
+            "Recherche",
+            "Aktenkunde"
+          ],
+          "soziales": [
+            "Ausfragen",
+            "Menschenkenntnis",
+            "Bluffen",
+            "Überreden"
+          ]
+        },
+        "inventar": [
+          "Notizblock",
+          "Kamera",
+          "Dienstausweis",
+          "Kaffeebecher",
+          "Taschenlampe"
+        ]
+      },
+      {
+        "id": "medizin",
+        "name": "Ärztin",
+        "berufe": [
+          "Notärztin",
+          "Sanitäter",
+          "Chirurgin",
+          "Pflegerin"
+        ],
+        "gewichte": {
+          "handeln": 1.4,
+          "wissen": 2.3,
+          "soziales": 1.3
+        },
+        "faehigkeiten": {
+          "handeln": [
+            "Erste Hilfe",
+            "Feinmotorik",
+            "Tragen"
+          ],
+          "wissen": [
+            "Anatomie",
+            "Pharmakologie",
+            "Diagnostik",
+            "Chemie",
+            "Hygiene"
+          ],
+          "soziales": [
+            "Beruhigen",
+            "Trösten",
+            "Anweisen"
+          ]
+        },
+        "inventar": [
+          "Arzttasche",
+          "Verbandsmaterial",
+          "Stethoskop",
+          "Ampullen",
+          "Handschuhe"
+        ]
+      }
+    ]
+  }
 }

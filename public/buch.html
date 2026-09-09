@@ -4,19 +4,11 @@
 <meta charset="utf-8">
 <title>Buch-Baukasten – How to be a Hero</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="app.css?v=3">
+<link rel="stylesheet" href="app.css?v=5">
 </head>
 <body>
-<header class="top">
-  <div class="top-box">
-    <img src="logo.png" alt="How to be a Hero" class="logo">
-    <div>
-      <h1>Buch-Baukasten</h1>
-      <p>Regelwerk, Module, Abenteuer und Charakterbogen: Klick dir zusammen, was deine Runde braucht, und nimm es als PDF mit an den Spieltisch. Immer auf dem Stand des Wikis.</p>
-    </div>
-    <img src="assets/Howky_hauptseite.png" alt="" class="howky">
-  </div>
-</header>
+<header class="top" id="kopf"></header>
+<p class="anmeldung" id="anmeldung"></p>
 
 <main id="app">
   <p id="loading">Katalog wird geladen …</p>
@@ -40,7 +32,12 @@
     </section>
     <section class="block c-blue">
       <h2><img class="badge" src="assets/How_to_charakter.png" alt="" style="height:26px">4. Charakterbogen</h2>
-      <div class="inner"><div class="grid sheets" id="sheets"></div></div>
+      <div class="inner">
+        <p class="hinweis">Leere Vorlage zum Ausdrucken:</p>
+        <div class="grid sheets" id="sheets"></div>
+        <p class="hinweis" style="margin-top:14px">Fertig ausgefüllte Bögen aus dem <a href="bogen">Charakterbogen-Editor</a>:</p>
+        <div id="eigenebogen" class="bogenliste"></div>
+      </div>
     </section>
     <section class="block c-red">
       <h2><img class="badge" src="assets/Stift.png" alt="">5. Format und Titel</h2>
@@ -66,6 +63,6 @@
   </form>
 </main>
 <footer class="foot">Die Inhalte stammen aus dem Wiki und stehen unter CC BY-NC-SA 4.0. Jedes PDF enthält eine Lizenzseite mit den Quellen. <a id="wikilink" href="https://howtobeahero.de">Zurück zum Wiki</a></footer>
-<script src="app.js?v=3"></script>
+<script type="module" src="app.js?v=5"></script>
 </body>
 </html>

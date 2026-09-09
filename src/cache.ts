@@ -39,3 +39,10 @@ export async function prune() {
     }
   } catch (e) { console.warn("Cache-Aufraeumen fehlgeschlagen:", String(e)); }
 }
+
+/** Kompletten Buch-Zwischenspeicher leeren, etwa wenn ein enthaltener Bogen verschwindet. */
+export async function pruneAll() {
+  try {
+    for (const f of await readdir(dir)) if (f.endsWith(".pdf")) await unlink(join(dir, f)).catch(() => {});
+  } catch (e) { console.warn("Zwischenspeicher leeren fehlgeschlagen:", String(e)); }
+}

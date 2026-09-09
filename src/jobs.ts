@@ -1,7 +1,7 @@
 import { cfg } from "./config";
 import { buildBook, resolve, type BookSpec } from "./book";
 
-export interface Job { id: string; key: string; spec: BookSpec; state: "queued" | "running" | "done" | "error"; message: string; path?: string; error?: string; created: number; finished?: number }
+export interface Job { id: string; key: string; spec: BookSpec; besitzer?: number | null; nutzerRef?: { id: number; gruppen: string[] } | null; state: "queued" | "running" | "done" | "error"; message: string; path?: string; error?: string; created: number; finished?: number }
 
 const jobs = new Map<string, Job>();
 const byKey = new Map<string, Job>();
@@ -10,12 +10,12 @@ let running = 0;
 
 export class TooBusy extends Error {}
 
-export async function submit(spec: BookSpec): Promise<Job> {
-  const r = await resolve(spec);
+export async function submit(spec: BookSpec, nutzer?: { id: number; gruppen: string[] } | null): Promise<Job> {
+  const r = await resolve(spec, nutzer);
   const existing = byKey.get(r.key);
   if (existing && existing.state !== "error") return existing;
   if (queue.length >= cfg.queueMax) throw new TooBusy("Zu viele Aufträge in der Warteschlange, bitte gleich noch einmal versuchen.");
-  const job: Job = { id: crypto.randomUUID(), key: r.key, spec, state: "queued", message: "In der Warteschlange", created: Date.now() };
+  const job: Job = { id: crypto.randomUUID(), key: r.key, spec, besitzer: r.privat ? (nutzer?.id ?? null) : null, nutzerRef: nutzer ?? null, state: "queued", message: "In der Warteschlange", created: Date.now() };
   jobs.set(job.id, job); byKey.set(r.key, job);
   queue.push(job);
   void pump();
@@ -31,7 +31,7 @@ async function pump() {
     job.state = "running"; job.message = "Wird vorbereitet …";
     (async () => {
       try {
-        const r = await resolve(job.spec);
+        const r = await resolve(job.spec, job.nutzerRef ?? null);
         const res = await buildBook(r, m => { job.message = m; });
         job.path = res.path; job.state = "done"; job.message = res.cached ? "Aus dem Zwischenspeicher" : "Fertig";
       } catch (e: any) {

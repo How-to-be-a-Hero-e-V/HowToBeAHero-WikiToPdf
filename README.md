@@ -5,6 +5,9 @@ einzelne Module und Abenteuer, wahlweise mit ausfüllbarem Charakterbogen, in A4
 Spielleitungen klicken sich im **Buch-Baukasten** ihr Buch zusammen und bekommen einen Link, den sie an
 ihre Gruppe weitergeben können.
 
+Dazu gehört der **Charakterbogen-Editor**: Helden online ausfüllen, per Knopfdruck auswürfeln,
+Portrait malen oder hochladen, im Wiki-Konto speichern und gezielt für die eigene Spielrunde freigeben.
+
 Version 2 (2026) ersetzt die alte Node/Parsoid/PhantomJS-Fassung von 2018 (Tag `v1-legacy`).
 
 ## Wie es funktioniert
@@ -30,15 +33,39 @@ Browser ──> Caddy ──/pdf/*──> wikitopdf (Bun + Chromium)
 5. Fertige Bücher werden unter einem Hash aus Titeln, Revisions-IDs, Format und Template-Version
    zwischengespeichert. Vordefinierte Bücher (`books` im Katalog) werden nachts vorgerendert.
 
+## Charakterbogen
+
+* `rules.js` ist das gemeinsame Regelmodul für Server und Browser: 400 Fähigkeitspunkte, Begabung =
+  Summe der Gruppe geteilt durch 10 (kaufmännisch), Endwert = Punkte + Begabung (höchstens 100),
+  Geistesblitzpunkte = Begabung geteilt durch 10.
+* Gefüllte Bögen werden **gezeichnet**, nicht über Formularfelder gefüllt. Damit lassen sich auch die
+  Setting-Bögen (Dysomnia, Der Schwarze Tod) befüllen, die keine Formularfelder haben, und mehrere
+  Bögen in einem Buch überlagern sich nicht. Das Layout kommt bei den offiziellen Bögen aus deren
+  Formularfeldern, bei den Setting-Bögen aus einer gemessenen Tabelle (`src/sheet.ts`).
+* Gespeichert wird in einer SQLite-Datei im Datenverzeichnis (`boegen.sqlite`), nächtlich als
+  `backup/boegen.sqlite` gesichert (nimmt das Offsite-Backup mit). Es werden nur die Eingaben
+  gespeichert, alle Werte werden beim Erzeugen neu berechnet.
+* Freigabe: gezielt an einzelne Wiki-Benutzer (Namen werden über die Wiki-API aufgelöst) und
+  optional an alle angemeldeten Nutzer. Ohne Anmeldung geht Ausfüllen und PDF, aber kein Speichern.
+* `tools/make_fillable.ts` erzeugt aus den beiden Setting-Bögen ausfüllbare PDF-Formulare
+  (`assets/sheets/`), damit auch der Download ohne Editor ausgefüllt werden kann.
+
 ## Endpunkte
 
 | Pfad | Zweck |
 |---|---|
-| `/` | Buch-Baukasten (Oberfläche) |
+| `/` | Übersicht der beiden Werkzeuge |
+| `/buch` | Buch-Baukasten (Oberfläche) |
+| `/bogen` | Charakterbogen-Editor |
 | `/book?rules=all&modules=A\|B&adventures=C&pages=D&sheet=standard&fmt=a5&title=…` | Buch anfordern; aus dem Cache sofort als PDF, sonst Warteseite mit automatischem Download. Dieser Link ist teilbar. |
 | `/book?book=regelwerk&fmt=a4` | vordefiniertes Buch |
 | `/book?pages=Kampf` | einzelne Seite (Link „Diese Seite als Buch-PDF" im Wiki) |
-| `/api/catalog` | Katalog mit aufgelösten Kategorien |
+| `/api/catalog` | Katalog mit aufgelösten Kategorien, Bögen und Zufallstabellen |
+| `/api/me` | Anmeldestand (Wiki-Sitzung über die Cookies) |
+| `/api/boegen` | eigene, für mich freigegebene und offene Bögen; POST speichert |
+| `/api/boegen/{id}/pdf`, `/portrait`, `/loeschen` | einzelner Bogen |
+| `/api/bogen/pdf` (POST) | ungespeicherten Bogen sofort als PDF, auch ohne Anmeldung |
+| `/api/internal/vanish`, `/api/internal/export` | nur mit Token, für Kontolöschung und Auskunft |
 | `/api/jobs` (POST, gleiche Parameter) → `/api/jobs/{id}` → `/api/jobs/{id}/download` | Auftrag anlegen, Status abfragen, PDF laden |
 | `/healthz` | Lebenszeichen |
 
@@ -83,6 +110,9 @@ handle /pdf {
 Umgebungsvariablen: `WIKI_API` (Standard `http://mediawiki/api.php`), `WIKI_INDEX`, `WIKI_HOST`,
 `PUBLIC_WIKI`, `PUBLIC_BASE`, `DATA_DIR`, `CATALOG_PAGE`, `PRERENDER_AT` (Standard `04:15`),
 `MAX_TITLES`, `CONCURRENCY`, `JOBS_PER_MINUTE`, `CACHE_MAX_BYTES`, `CACHE_MAX_AGE_DAYS`.
+`INTERNAL_TOKEN` überschreibt das Geheimnis für die interne Schnittstelle; ohne die Variable erzeugt
+der Dienst es einmalig als `internal.token` im Datenverzeichnis. Dasselbe Geheimnis trägt das Wiki
+als `$wgWikiToPdfToken` in der LocalSettings.php.
 
 Lokal entwickeln: `bun install && WIKI_API=https://howtobeahero.de/api.php WIKI_INDEX=https://howtobeahero.de/index.php CHROMIUM_PATH=/Applications/Chromium.app/Contents/MacOS/Chromium bun run dev`
 

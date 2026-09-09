@@ -1,5 +1,5 @@
 import { cfg } from "./config";
-import { nutzerVonRequest, istAdmin, csrfOk, type Nutzer } from "./auth";
+import { nutzerVonRequest, istAdmin, istRedakteur, csrfOk, type Nutzer } from "./auth";
 import * as store from "./store";
 import { bogenPdf } from "./sheet";
 import { loadCatalog } from "./catalog";
@@ -39,9 +39,13 @@ function portraitAusDataUrl(dataUrl: unknown): { bytes: Uint8Array; typ: string 
 
 const ansicht = (b: any, mit: Nutzer | null) => {
   const eigener = !!mit && b.besitzer_id === mit.id;
+  const oeffentlich = !!b.oeffentlich;
+  const wartet = !!b.freigegeben && !oeffentlich && !b.abgelehnt;
   return {
     id: b.id, titel: b.titel, design: b.design, besitzer: b.besitzer_name, eigener,
-    freigegeben: !!b.freigegeben, hatPortrait: !!b.hat_portrait || !!b.portrait, geaendert: b.geaendert,
+    freigegeben: !!b.freigegeben, oeffentlich, wartet, abgelehnt: !!b.abgelehnt,
+    sichter: b.sichter ?? null, sichtungAm: b.sichtung_am ?? null, sichtungGrund: b.sichtung_grund ?? null,
+    hatPortrait: !!b.hat_portrait || !!b.portrait, geaendert: b.geaendert,
     freigabeNamen: eigener || istAdmin(mit) ? store.freigabenVon(b.id).map((f) => f.nutzer_name) : undefined,
   };
 };
@@ -56,8 +60,8 @@ async function sheetVon(design: string) {
 /** Eigene Bögen immer, gezielt freigegebene für die genannten Nutzer, „für alle" für Angemeldete. */
 function darfSehen(b: store.Bogen, n: Nutzer | null) {
   if (!n) return false;
-  if (b.besitzer_id === n.id || istAdmin(n)) return true;
-  if (b.freigegeben) return true;
+  if (b.besitzer_id === n.id || istAdmin(n) || istRedakteur(n)) return true;
+  if (b.oeffentlich) return true;
   return store.istFreigegebenFuer(b.id, n.id);
 }
 
@@ -89,7 +93,8 @@ export async function sheetRoutes(path: string, req: Request, url: URL): Promise
 
   if (path === "/api/me") {
     return json({
-      angemeldet: !!nutzer, name: nutzer?.name ?? null, admin: istAdmin(nutzer),
+      angemeldet: !!nutzer, name: nutzer?.name ?? null, admin: istAdmin(nutzer), redakteur: istRedakteur(nutzer),
+      offeneSichtungen: istRedakteur(nutzer) ? store.zurSichtung().length : 0,
       anmeldelink: `${cfg.publicWiki}/index.php?title=Spezial:Anmelden`, wiki: cfg.publicWiki,
       grenzen: { proNutzer: store.MAX_PRO_NUTZER, portraitKb: Math.round(store.MAX_PORTRAIT / 1024) },
     });
@@ -118,14 +123,15 @@ export async function sheetRoutes(path: string, req: Request, url: URL): Promise
     const design = kurz(body.design, 40) || "standard";
     await sheetVon(design);
     let id = kurz(body.id, 24);
+    let altBogen: store.Bogen | undefined;
     let erstellt: string | undefined;
     let portraitSetzen = false;
     let portrait: { bytes: Uint8Array; typ: string } | null = null;
     if (id) {
-      const alt = store.hole(id);
-      if (!alt) return json({ error: "Bogen nicht gefunden." }, 404);
-      if (alt.besitzer_id !== nutzer.id && !istAdmin(nutzer)) return json({ error: "Das ist nicht dein Bogen." }, 403);
-      erstellt = alt.erstellt;
+      altBogen = store.hole(id) ?? undefined;
+      if (!altBogen) return json({ error: "Bogen nicht gefunden." }, 404);
+      if (altBogen.besitzer_id !== nutzer.id && !istAdmin(nutzer)) return json({ error: "Das ist nicht dein Bogen." }, 403);
+      erstellt = altBogen.erstellt;
       if (body.portrait !== undefined) { portraitSetzen = true; portrait = body.portrait ? portraitAusDataUrl(body.portrait) : null; }
     } else {
       if (store.anzahlVon(nutzer.id) >= store.MAX_PRO_NUTZER)
@@ -140,13 +146,43 @@ export async function sheetRoutes(path: string, req: Request, url: URL): Promise
       freigabeFehlend = fehlend;
       store.setzeFreigaben(id, gefunden.filter((g) => g.nutzer_id !== nutzer.id));
     }
+    // Öffentlich heißt: von einem Redakteur gesichtet. Redakteure geben ihre eigenen Bögen direkt frei.
+    const willOeffentlich = !!body.freigegeben;
+    const inhaltGleich = !!altBogen && altBogen.daten === alsText && altBogen.titel === (kurz(body.titel, 80) || daten.name || "Namenloser Held")
+      && altBogen.design === design && !portraitSetzen;
+    let oeffentlich = 0, abgelehnt = 0;
+    if (willOeffentlich) {
+      if (istRedakteur(nutzer)) oeffentlich = 1;
+      else if (altBogen?.oeffentlich && inhaltGleich) oeffentlich = 1;   // reine Freigabeänderung braucht keine neue Sichtung
+    }
     const gespeichert = store.speichere({
       id, besitzer_id: nutzer.id, besitzer_name: nutzer.name,
       titel: kurz(body.titel, 80) || daten.name || "Namenloser Held", design, daten: alsText,
-      freigegeben: body.freigegeben ? 1 : 0, erstellt,
+      freigegeben: willOeffentlich ? 1 : 0, erstellt,
       portrait: portrait?.bytes ?? null, portrait_typ: portrait?.typ ?? null,
     }, portraitSetzen);
-    return json({ bogen: ansicht(gespeichert, nutzer), unbekannteNutzer: freigabeFehlend });
+    store.setzeOeffentlich(id, !!oeffentlich, !!abgelehnt);
+    return json({ bogen: ansicht(store.hole(id)!, nutzer), unbekannteNutzer: freigabeFehlend });
+  }
+
+  if (path === "/api/sichtung" && req.method === "GET") {
+    if (!istRedakteur(nutzer)) return json({ error: "Nur für Redakteure." }, 403);
+    return json({
+      offen: store.zurSichtung().map((b) => ansicht(b, nutzer)),
+      erledigt: store.zuletztGesichtet().map((b) => ansicht(b, nutzer)),
+    });
+  }
+
+  const sicht = path.match(/^\/api\/boegen\/([A-Za-z0-9]{4,24})\/sichten$/);
+  if (sicht) {
+    if (req.method !== "POST") return json({ error: "Falsche Methode." }, 405);
+    if (!istRedakteur(nutzer)) return json({ error: "Nur für Redakteure." }, 403);
+    if (!csrfOk(req)) return json({ error: "Ungültige Anfrage." }, 403);
+    const b = store.hole(sicht[1]);
+    if (!b) return json({ error: "Bogen nicht gefunden." }, 404);
+    const body = await req.json().catch(() => null) as any;
+    const neu = store.sichte(b.id, !!body?.frei, nutzer!.name, kurz(body?.grund, 300));
+    return json({ bogen: ansicht(neu!, nutzer) });
   }
 
   const m = path.match(/^\/api\/boegen\/([A-Za-z0-9]{4,24})(\/pdf|\/portrait|\/loeschen)?$/);

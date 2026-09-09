@@ -46,7 +46,7 @@ export async function specFromQuery(q: URLSearchParams): Promise<BookSpec> {
   spec.modules = [...new Set(spec.modules)]; spec.adventures = [...new Set(spec.adventures)]; spec.pages = [...new Set(spec.pages)];
   if (spec.sheet && !cat.sheets.some(s => s.id === spec.sheet)) throw new HttpError(400, `Unbekannter Charakterbogen: ${spec.sheet}`);
   const total = spec.rules.length + spec.modules.length + spec.adventures.length + spec.pages.length;
-  if (total === 0 && !spec.sheet) throw new HttpError(400, "Keine Seiten ausgewählt.");
+  if (total === 0 && !spec.sheet && !spec.boegen.length) throw new HttpError(400, "Keine Seiten ausgewählt.");
   if (total > cfg.maxTitles) throw new HttpError(400, `Höchstens ${cfg.maxTitles} Seiten pro Buch.`);
   if (!spec.title) spec.title = defaultTitle(spec, cat);
   return spec;
@@ -121,8 +121,8 @@ export async function resolve(spec: BookSpec, nutzer?: { id: number; gruppen: st
     if (!b) throw new HttpError(404, "Ein ausgewählter Charakterbogen wurde nicht gefunden.");
     const eigen = !!nutzer && b.besitzer_id === nutzer.id;
     const gezielt = !!nutzer && store.istFreigegebenFuer(b.id, nutzer.id);
-    if (!eigen && !admin && !gezielt && !(b.freigegeben && nutzer)) throw new HttpError(403, `Der Charakterbogen „${b.titel}“ ist nicht für dich freigegeben.`);
-    if (!b.freigegeben) privat = true;
+    if (!eigen && !admin && !gezielt && !(b.oeffentlich && nutzer)) throw new HttpError(403, `Der Charakterbogen „${b.titel}“ ist nicht für dich freigegeben.`);
+    if (!b.oeffentlich) privat = true;
     boegen.push({ id: b.id, titel: b.titel, geaendert: b.geaendert });
   }
   const keySrc = JSON.stringify({ v: cfg.templateVersion, t: spec.title, f: spec.fmt, s: sheet?.file ?? null,

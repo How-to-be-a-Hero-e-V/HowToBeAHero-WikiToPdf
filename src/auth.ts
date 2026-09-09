@@ -1,6 +1,6 @@
 import { cfg } from "./config";
 
-export interface Nutzer { id: number; name: string; gruppen: string[] }
+export interface Nutzer { id: number; name: string; gruppen: string[]; rechte: string[] }
 
 const cache = new Map<string, { at: number; nutzer: Nutzer | null }>();
 const TTL = 60_000;
@@ -24,13 +24,13 @@ export async function nutzerVonRequest(req: Request): Promise<Nutzer | null> {
     const u = new URL(cfg.wikiApi);
     u.searchParams.set("action", "query");
     u.searchParams.set("meta", "userinfo");
-    u.searchParams.set("uiprop", "groups");
+    u.searchParams.set("uiprop", "groups|rights");
     u.searchParams.set("format", "json");
     u.searchParams.set("formatversion", "2");
     const r = await fetch(u, { headers: { Host: cfg.wikiHost, Cookie: cookie, "User-Agent": "HTBAH-WikiToPdf/2.0" } });
     if (r.ok) {
       const info = (await r.json())?.query?.userinfo;
-      if (info && !info.anon && info.id > 0) nutzer = { id: info.id, name: info.name, gruppen: info.groups ?? [] };
+      if (info && !info.anon && info.id > 0) nutzer = { id: info.id, name: info.name, gruppen: info.groups ?? [], rechte: info.rights ?? [] };
     }
   } catch (e) {
     console.warn("Anmeldeprüfung fehlgeschlagen:", String(e));
@@ -41,6 +41,10 @@ export async function nutzerVonRequest(req: Request): Promise<Nutzer | null> {
 }
 
 export const istAdmin = (n: Nutzer | null) => !!n && (n.gruppen.includes("sysop") || n.gruppen.includes("bureaucrat"));
+
+/** Sichten darf, wer im Wiki Versionen freigeben darf – das sind die Redakteure. */
+export const istRedakteur = (n: Nutzer | null) =>
+  !!n && (istAdmin(n) || n.rechte.includes("approverevisions") || n.gruppen.includes("Redakteure"));
 
 /** Schreibzugriffe nur aus dem eigenen Wiki heraus, nicht von fremden Seiten. */
 export function csrfOk(req: Request): boolean {

@@ -16,9 +16,22 @@ export async function api(pfad, opt = {}) {
 }
 
 /** Kopfleiste mit Navigation; hebt die aktuelle Seite hervor. */
+let aktuelleSeite = "";
+
+/** Sichtungs-Link erscheint nur für Redakteure. */
+export function navFuer(me) {
+  if (!me?.redakteur) return;
+  const nav = document.querySelector(".nav");
+  if (!nav || nav.querySelector("[data-sichten]")) return;
+  const offen = me.offeneSichtungen ? ` (${me.offeneSichtungen})` : "";
+  nav.insertAdjacentHTML("beforeend",
+    `<a class="navlink${aktuelleSeite === "sichten" ? " aktiv" : ""}" data-sichten href="${BASE}/sichten">Sichtung${offen}</a>`);
+}
+
 export function kopfleiste(aktiv, titel, untertitel, howky = "Howky_hauptseite.png") {
   const nav = [["buch", "Buch-Baukasten"], ["bogen", "Charakterbogen"]]
     .map(([id, t]) => `<a class="navlink${id === aktiv ? " aktiv" : ""}" href="${BASE}/${id}">${t}</a>`).join("");
+  aktuelleSeite = aktiv;
   return `<div class="top-box">
     <a href="${BASE}/" class="loglink"><img src="${BASE}/logo.png" alt="How to be a Hero" class="logo"></a>
     <div>

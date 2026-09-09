@@ -1,4 +1,4 @@
-import { BASE, $, $$, esc, api, kopfleiste, anmeldeleiste } from "./common.js";
+import { BASE, $, $$, esc, api, kopfleiste, anmeldeleiste, navFuer } from "./common.js";
 import { berechne, leererCharakter, wuerfleCharakter, GRUPPEN, GRUPPEN_LABEL, MAX_ZEILEN, PUNKTE_GESAMT, restText } from "./rules.js";
 import { maleditor } from "./malen.js";
 
@@ -7,6 +7,7 @@ const ENTWURF = "htbah-bogen-entwurf";
 
 $("#kopf").innerHTML = kopfleiste("bogen", "Charakterbogen", "Fülle deinen Helden hier aus, würfle ihn aus oder male sein Portrait. Am Ende kommt ein fertiges PDF heraus.", "Howky_lesen.png");
 const me = await anmeldeleiste($("#anmeldung"));
+navFuer(me);
 const cat = await api("/api/catalog");
 $("#wikilink").href = cat.wiki;
 
@@ -155,7 +156,10 @@ $("#form").addEventListener("submit", async (e) => {
     const { bogen, unbekannteNutzer } = await api("/api/boegen", { method: "POST", body: koerper });
     zustand.id = bogen.id; zustand.portraitGeaendert = false;
     $("#f-freigabe").value = (bogen.freigabeNamen ?? []).join(", ");
-    const wem = bogen.freigegeben ? "für alle angemeldeten Nutzer" : (bogen.freigabeNamen?.length ? `freigegeben für ${bogen.freigabeNamen.join(", ")}` : "nur für dich");
+    const wem = bogen.oeffentlich ? "öffentlich für alle angemeldeten Nutzer"
+      : bogen.wartet ? "zur Sichtung bei den Redakteuren"
+      : bogen.abgelehnt ? `von der Sichtung abgelehnt${bogen.sichtungGrund ? ` (${bogen.sichtungGrund})` : ""}`
+      : (bogen.freigabeNamen?.length ? `freigegeben für ${bogen.freigabeNamen.join(", ")}` : "nur für dich");
     melde(`Gespeichert als „${bogen.titel}“, ${wem}.` + (unbekannteNutzer?.length ? ` Unbekannt im Wiki: ${unbekannteNutzer.join(", ")}.` : ""), !!unbekannteNutzer?.length);
     await ladeListe();
   } catch (err) { melde(err.message, true); }
@@ -193,12 +197,20 @@ $("#neu").addEventListener("click", () => {
   schreibe(leererCharakter()); zeigePortrait(); melde("Leerer Bogen.");
 });
 
+function zustandText(b) {
+  if (b.oeffentlich) return " · öffentlich";
+  if (b.wartet) return " · wartet auf Sichtung";
+  if (b.abgelehnt) return ` · abgelehnt${b.sichtungGrund ? `: ${esc(b.sichtungGrund)}` : ""}`;
+  if (b.freigabeNamen?.length) return ` · für ${esc(b.freigabeNamen.join(", "))}`;
+  return "";
+}
+
 function bogenKarte(b) {
   return `<div class="bogenkarte">
     ${b.hatPortrait ? `<img class="mini" src="${BASE}/api/boegen/${b.id}/portrait" alt="">` : `<div class="mini leer">?</div>`}
     <div class="bogeninfo">
       <strong>${esc(b.titel)}</strong>
-      <span>${esc(b.besitzer)} · ${new Date(b.geaendert).toLocaleDateString("de-DE")}${b.freigegeben ? " · für alle" : (b.freigabeNamen?.length ? ` · für ${esc(b.freigabeNamen.join(", "))}` : "")}</span>
+      <span>${esc(b.besitzer)} · ${new Date(b.geaendert).toLocaleDateString("de-DE")}${zustandText(b)}</span>
     </div>
     <div class="bogenaktionen">
       <button type="button" class="linkbtn" data-laden="${b.id}">Öffnen</button>

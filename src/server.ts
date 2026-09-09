@@ -42,7 +42,7 @@ async function handle(req: Request, server: any): Promise<Response> {
   if (req.method !== "GET" && req.method !== "POST" && req.method !== "HEAD") return text("Method not allowed", 405);
 
   if (path === "/healthz") return text("ok");
-  const seiten: Record<string, string> = { "/": "start.html", "/index.html": "start.html", "/buch": "buch.html", "/buch/": "buch.html", "/bogen": "bogen.html", "/bogen/": "bogen.html" };
+  const seiten: Record<string, string> = { "/": "start.html", "/index.html": "start.html", "/buch": "buch.html", "/buch/": "buch.html", "/bogen": "bogen.html", "/bogen/": "bogen.html", "/sichten": "sichten.html", "/sichten/": "sichten.html" };
   if (seiten[path]) return new Response(Bun.file(join(pub, seiten[path])), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache" } });
   if (/^\/[a-z0-9._-]+\.(js|css)$/.test(path)) {
     const f = Bun.file(join(pub, path.slice(1)));

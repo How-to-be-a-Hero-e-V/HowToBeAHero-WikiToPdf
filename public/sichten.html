@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Sichtung – How to be a Hero</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="app.css?v=6">
+</head>
+<body>
+<header class="top" id="kopf"></header>
+<p class="anmeldung" id="anmeldung"></p>
+<main>
+  <p id="loading">Wird geladen …</p>
+  <div id="inhalt" hidden>
+    <section class="block c-red">
+      <h2><img class="badge" src="assets/Howky_frage.png" alt="">Wartet auf Sichtung <small id="anzahl"></small></h2>
+      <div class="inner"><div id="offen" class="sichtliste"></div></div>
+    </section>
+    <section class="block c-green">
+      <h2><img class="badge" src="assets/Howky_lesen.png" alt="">Zuletzt entschieden</h2>
+      <div class="inner"><div id="erledigt" class="sichtliste"></div></div>
+    </section>
+  </div>
+</main>
+<footer class="foot">Nur Bögen, die jemand für <em>alle</em> angemeldeten Nutzer freigeben will, landen hier. Bögen, die gezielt an einzelne Nutzer gehen, brauchen keine Sichtung. <a id="wikilink" href="https://howtobeahero.de">Zurück zum Wiki</a></footer>
+<script type="module" src="sichten.js?v=6"></script>
+</body>
+</html>

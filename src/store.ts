@@ -31,10 +31,19 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_freigabe_nutzer ON freigaben (nutzer_id);
 `);
 
+// Spalten für die Sichtung öffentlicher Bögen nachrüsten
+{
+  const vorhanden = new Set(db.query<{ name: string }, any>("PRAGMA table_info(boegen)").all().map((r) => r.name));
+  for (const [name, def] of [["oeffentlich", "INTEGER NOT NULL DEFAULT 0"], ["abgelehnt", "INTEGER NOT NULL DEFAULT 0"],
+                             ["sichter", "TEXT"], ["sichtung_am", "TEXT"], ["sichtung_grund", "TEXT"]] as const)
+    if (!vorhanden.has(name)) db.exec(`ALTER TABLE boegen ADD COLUMN ${name} ${def}`);
+}
+
 export interface Bogen {
   id: string; besitzer_id: number; besitzer_name: string; titel: string;
   design: string; daten: string; freigegeben: number; erstellt: string; geaendert: string;
   portrait?: Uint8Array | null; portrait_typ?: string | null;
+  oeffentlich?: number; abgelehnt?: number; sichter?: string | null; sichtung_am?: string | null; sichtung_grund?: string | null;
 }
 export const MAX_PRO_NUTZER = 50;
 export const MAX_DATEN = 16 * 1024;
@@ -43,18 +52,40 @@ export const MAX_PORTRAIT = 500 * 1024;
 const jetzt = () => new Date().toISOString();
 export const neueId = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
 
-const OHNE_BILD = "id, besitzer_id, besitzer_name, titel, design, daten, freigegeben, erstellt, geaendert, (portrait IS NOT NULL) AS hat_portrait";
+const OHNE_BILD = "id, besitzer_id, besitzer_name, titel, design, daten, freigegeben, erstellt, geaendert, oeffentlich, abgelehnt, sichter, sichtung_am, sichtung_grund, (portrait IS NOT NULL) AS hat_portrait";
 
 export const eigene = (uid: number) =>
   db.query<Bogen & { hat_portrait: number }, any>(`SELECT ${OHNE_BILD} FROM boegen WHERE besitzer_id = ? ORDER BY geaendert DESC`).all(uid);
 
+/** Für alle angemeldeten Nutzer sichtbar: freigegeben und von einem Redakteur gesichtet. */
 export const freigegebene = (limit = 300) =>
-  db.query<Bogen & { hat_portrait: number }, any>(`SELECT ${OHNE_BILD} FROM boegen WHERE freigegeben = 1 ORDER BY geaendert DESC LIMIT ?`).all(limit);
+  db.query<Bogen & { hat_portrait: number }, any>(`SELECT ${OHNE_BILD} FROM boegen WHERE oeffentlich = 1 ORDER BY geaendert DESC LIMIT ?`).all(limit);
+
+/** Wartet auf Sichtung: der Besitzer will öffentlich, ein Redakteur hat noch nicht entschieden. */
+export const zurSichtung = (limit = 200) =>
+  db.query<Bogen & { hat_portrait: number }, any>(
+    `SELECT ${OHNE_BILD} FROM boegen WHERE freigegeben = 1 AND oeffentlich = 0 AND abgelehnt = 0 ORDER BY geaendert ASC LIMIT ?`).all(limit);
+
+/** Zuletzt entschieden, damit Redakteure ihre Sichtung nachvollziehen und korrigieren können. */
+export const zuletztGesichtet = (limit = 30) =>
+  db.query<Bogen & { hat_portrait: number }, any>(
+    `SELECT ${OHNE_BILD} FROM boegen WHERE sichtung_am IS NOT NULL ORDER BY sichtung_am DESC LIMIT ?`).all(limit);
+
+export function sichte(id: string, frei: boolean, sichter: string, grund = "") {
+  db.query(`UPDATE boegen SET oeffentlich = $frei, abgelehnt = $abgelehnt, sichter = $sichter,
+            sichtung_am = $am, sichtung_grund = $grund WHERE id = $id`)
+    .run({ $frei: frei ? 1 : 0, $abgelehnt: frei ? 0 : 1, $sichter: sichter, $am: new Date().toISOString(), $grund: grund.slice(0, 300), $id: id });
+  return hole(id);
+}
 
 export const hole = (id: string) => db.query<Bogen, any>("SELECT * FROM boegen WHERE id = ?").get(id);
 
 export const anzahlVon = (uid: number) =>
   (db.query<{ n: number }, any>("SELECT COUNT(*) AS n FROM boegen WHERE besitzer_id = ?").get(uid)?.n ?? 0);
+
+export function setzeOeffentlich(id: string, oeffentlich: boolean, abgelehnt = false) {
+  db.query("UPDATE boegen SET oeffentlich = ?, abgelehnt = ? WHERE id = ?").run(oeffentlich ? 1 : 0, abgelehnt ? 1 : 0, id);
+}
 
 export function speichere(b: Omit<Bogen, "erstellt" | "geaendert"> & { erstellt?: string }, portraitSetzen = false) {
   const t = jetzt();

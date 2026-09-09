@@ -1,5 +1,5 @@
 // Gemeinsame Helfer für Buch-Baukasten und Charakterbogen.
-export const BASE = location.pathname.replace(/\/(buch|bogen|index\.html)?\/?$/, "") || "";
+export const BASE = location.pathname.replace(/\/(buch|bogen|sichten|index\.html)?\/?$/, "") || "";
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 export const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));

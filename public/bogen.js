@@ -1,4 +1,4 @@
-import { BASE, $, $$, esc, api, kopfleiste, anmeldeleiste, navFuer } from "./common.js";
+import { BASE, $, $$, esc, api, kopfleiste, anmeldeleiste, navFuer, credit } from "./common.js";
 import { berechne, leererCharakter, wuerfleCharakter, GRUPPEN, GRUPPEN_LABEL, MAX_ZEILEN, PUNKTE_GESAMT, restText } from "./rules.js";
 import { maleditor } from "./malen.js";
 
@@ -38,7 +38,7 @@ $("#gruppen").innerHTML = GRUPPEN.map((g) => `
 $("#designs").innerHTML = cat.sheets.map((s, i) => `
   <label class="item${i === 0 ? " sel" : ""}">
     <input type="radio" name="design" value="${esc(s.id)}"${i === 0 ? " checked" : ""}>
-    <span><b>${esc(s.name)}</b><span class="desc">${esc(s.description || "")}</span></span>
+    <span><b>${esc(s.name)}</b><span class="desc">${esc(s.description || "")}</span>${credit(s)}</span>
   </label>`).join("");
 
 $("#loading").hidden = true;

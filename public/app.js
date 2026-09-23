@@ -1,4 +1,4 @@
-import { BASE as base, $, esc as escape2, kopfleiste, anmeldeleiste, api } from "./common.js";
+import { BASE as base, $, esc as escape2, kopfleiste, anmeldeleiste, api, credit } from "./common.js";
 $("#kopf").innerHTML = kopfleiste("buch", "Buch-Baukasten", "Regelwerk, Module, Abenteuer und Charakterbogen: Klick dir zusammen, was deine Runde braucht, und nimm es als PDF mit an den Spieltisch.");
 const me = await anmeldeleiste($("#anmeldung"));
 (async function () {
@@ -14,7 +14,7 @@ const me = await anmeldeleiste($("#anmeldung"));
       <div class="grid">${g.members.map(t => item(sec, t)).join("") || "<em>keine Einträge</em>"}</div></details>`).join("");
   }
   $("#sheets").innerHTML = `<label class="item sel"><input type="radio" name="sheet" value="" checked><span><b>Kein Charakterbogen</b></span></label>` +
-    cat.sheets.map(s => `<label class="item"><input type="radio" name="sheet" value="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="desc">${esc(s.description || "")}</span></span></label>`).join("");
+    cat.sheets.map(s => `<label class="item"><input type="radio" name="sheet" value="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="desc">${esc(s.description || "")}</span>${credit(s)}</span></label>`).join("");
 
   // Gespeicherte Charakterbögen zum Mitnehmen ins Buch
   try {

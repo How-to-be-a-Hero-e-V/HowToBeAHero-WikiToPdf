@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { PDFDocument, rgb, BlendMode, type PDFFont, type PDFPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { join } from "node:path";
 import { berechne, restText, GRUPPEN, GRUPPEN_LABEL, MAX_ZEILEN, type Gruppe as RGruppe } from "../public/rules.js";
@@ -88,7 +88,7 @@ function layoutSetting(hoehe = 842, breite = 595): Layout {
       beruf: feld(37, 241, 165, 42), familienstand: feld(217, 241, 162, 42),
     },
     gruppen,
-    inventar: box(42, 650, 241, 120), anmerkungen: box(313, 650, 241, 120), portrait: box(401, 86, 157, 193),
+    inventar: box(42, 650, 241, 120), anmerkungen: box(313, 650, 241, 120), portrait: box(405, 106, 149, 165),
     fuss: box(37, 286, 522, 14),
   };
 }
@@ -182,7 +182,9 @@ export async function bogenPdf(ch: any, sheet: Sheet, portrait?: { bytes: Uint8A
       const r = layout.portrait;
       const skal = Math.min(r.w / bild.width, r.h / bild.height);      // vollständig sichtbar, Seitenverhältnis erhalten
       const w = bild.width * skal, h = bild.height * skal;
-      page.drawImage(bild, { x: r.x + (r.w - w) / 2, y: r.y + (r.h - h) / 2, width: w, height: h });
+      // Bei „multiply“ bleibt die Zeichnung des Kastens sichtbar (etwa die Messlatte beim Mugshot)
+      page.drawImage(bild, { x: r.x + (r.w - w) / 2, y: r.y + (r.h - h) / 2, width: w, height: h,
+        blendMode: sheet.portraitMischen === "multiply" ? BlendMode.Multiply : undefined });
     } catch (e) { console.warn("Portrait konnte nicht eingebettet werden:", String(e)); }
   }
   block(page, layout.inventar, String(ch.inventar ?? ""), font);

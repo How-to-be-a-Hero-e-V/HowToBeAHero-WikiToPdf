@@ -3,7 +3,7 @@ import { categoryMembers, rawPage } from "./wiki";
 import defaults from "../catalog.default.json";
 
 export interface Group { id: string; name: string; category: string; members?: string[] }
-export interface Sheet { id: string; name: string; file: string; description?: string }
+export interface Sheet { id: string; name: string; file: string; description?: string; credit?: string; creditLink?: string; portraitMischen?: "multiply" }
 export interface BookDef { title: string; rules?: "all" | string[]; modules?: string[]; adventures?: string[]; pages?: string[]; sheet?: string }
 export interface Catalog {
   rulebook: { name: string; chapters: string[] };

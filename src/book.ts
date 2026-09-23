@@ -80,7 +80,7 @@ export function specToQuery(spec: BookSpec, allChapters: string[] = []): string 
 
 export class HttpError extends Error { constructor(public status: number, msg: string) { super(msg); } }
 
-interface Resolved { spec: BookSpec; key: string; parts: { id: string; name: string; chapters: { id: string; title: string; wikiTitle: string; revid: number }[] }[]; sheetFile?: string; sheetName?: string; boegen: { id: string; titel: string; geaendert: string }[]; privat: boolean }
+interface Resolved { spec: BookSpec; key: string; parts: { id: string; name: string; chapters: { id: string; title: string; wikiTitle: string; revid: number }[] }[]; sheetFile?: string; sheetName?: string; boegen: { id: string; titel: string; geaendert: string; design: string }[]; privat: boolean }
 
 // Titel pruefen, Revisionen holen, Cache-Schluessel bilden.
 export async function resolve(spec: BookSpec, nutzer?: { id: number; gruppen: string[] } | null): Promise<Resolved> {
@@ -113,7 +113,7 @@ export async function resolve(spec: BookSpec, nutzer?: { id: number; gruppen: st
   const sheet = spec.sheet ? cat.sheets.find(s => s.id === spec.sheet) : undefined;
   // Charakterbögen: eigene immer, freigegebene für angemeldete Nutzer, alles für Admins
   const store = await import("./store");
-  const boegen: { id: string; titel: string; geaendert: string }[] = [];
+  const boegen: { id: string; titel: string; geaendert: string; design: string }[] = [];
   let privat = false;
   const admin = !!nutzer && (nutzer.gruppen.includes("sysop") || nutzer.gruppen.includes("bureaucrat"));
   for (const id of spec.boegen) {
@@ -123,7 +123,7 @@ export async function resolve(spec: BookSpec, nutzer?: { id: number; gruppen: st
     const gezielt = !!nutzer && store.istFreigegebenFuer(b.id, nutzer.id);
     if (!eigen && !admin && !gezielt && !(b.oeffentlich && nutzer)) throw new HttpError(403, `Der Charakterbogen „${b.titel}“ ist nicht für dich freigegeben.`);
     if (!b.oeffentlich) privat = true;
-    boegen.push({ id: b.id, titel: b.titel, geaendert: b.geaendert });
+    boegen.push({ id: b.id, titel: b.titel, geaendert: b.geaendert, design: b.design });
   }
   const keySrc = JSON.stringify({ v: cfg.templateVersion, t: spec.title, f: spec.fmt, s: sheet?.file ?? null,
     b: boegen.map(b => [b.id, b.geaendert]), p: parts.map(p => [p.name, p.chapters.map(c => [c.wikiTitle, c.revid])]) });
@@ -149,7 +149,15 @@ async function assemble(r: Resolved, progress: Progress): Promise<Book> {
     }
     parts.push({ id: `p-${p.id}`, name: p.name, chapters });
   }
-  return { title: r.spec.title, fmt: r.spec.fmt, parts, sheetName: r.sheetName, created: new Date() };
+  // Gestalter der verwendeten Bogendesigns auf der Lizenzseite nennen
+  const designs = new Set<string>();
+  const leer = r.spec.sheet ? cat.sheets.find((s) => s.id === r.spec.sheet) : undefined;
+  if (leer) designs.add(leer.id);
+  for (const b of r.boegen) designs.add(b.design);
+  const designCredits = [...designs].map((id) => cat.sheets.find((s) => s.id === id))
+    .filter((s): s is NonNullable<typeof s> => !!s?.credit)
+    .map((s) => `Charakterbogen-Design „${s.name}“: ${s.credit}${s.creditLink ? ` – ${s.creditLink}` : ""}`);
+  return { title: r.spec.title, fmt: r.spec.fmt, parts, sheetName: r.sheetName, created: new Date(), designCredits };
 }
 
 export async function debugHtml(spec: BookSpec): Promise<string> {

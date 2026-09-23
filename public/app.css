@@ -214,3 +214,5 @@ input[type=color] { width: 100%; height: 30px; border: 3px solid var(--grey); ba
 .sichtkarte.abgelehnt { border-left-color: var(--red); }
 .sichtkarte .mini { width: 44px; height: 54px; object-fit: cover; border: 2px solid var(--grey-light); background: #fff; }
 .sichtkarte .mini.leer { display: flex; align-items: center; justify-content: center; color: var(--grey); font-weight: 700; }
+.credit { display: block; font-size: 0.75em; color: var(--grey-dark); margin-top: 2px; }
+.credit a { color: var(--grey-dark); }

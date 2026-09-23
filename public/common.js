@@ -53,3 +53,12 @@ export async function anmeldeleiste(el) {
     return me;
   } catch { el.textContent = ""; return { angemeldet: false }; }
 }
+
+/** Dezenter Hinweis auf die Gestaltung eines Bogendesigns. */
+export function credit(sheet) {
+  if (!sheet?.credit) return "";
+  const name = sheet.creditLink
+    ? `<a href="${esc(sheet.creditLink)}" target="_blank" rel="noopener">${esc(sheet.credit)}</a>`
+    : esc(sheet.credit);
+  return `<span class="credit">Design: ${name}</span>`;
+}

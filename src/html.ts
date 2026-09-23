@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 export interface Chapter { id: string; title: string; html: string; revid: number; wikiTitle: string; headings: { id: string; text: string }[] }
 export interface Part { id: string; name: string; chapters: Chapter[] }
-export interface Book { title: string; fmt: "a4" | "a5"; parts: Part[]; sheetName?: string; created: Date }
+export interface Book { title: string; fmt: "a4" | "a5"; parts: Part[]; sheetName?: string; created: Date; designCredits?: string[] }
 
 const tplDir = join(import.meta.dir, "..", "template");
 const css = await Bun.file(join(tplDir, "book.css")).text();
@@ -139,6 +139,7 @@ export function buildDocument(book: Book): string {
   <p>Dieses Buch wurde am ${esc(date)} automatisch aus dem How-to-be-a-Hero-Wiki (howtobeahero.de) zusammengestellt. Die Texte stammen von der Wiki-Community und stehen unter der Lizenz <strong>Creative Commons Namensnennung – Nicht-kommerziell – Weitergabe unter gleichen Bedingungen 4.0</strong> (CC BY-NC-SA 4.0). Du darfst das Buch teilen und verändern, solange du die Quelle nennst, es nicht kommerziell nutzt und Bearbeitungen unter derselben Lizenz weitergibst.</p>
   <p>Die Autorinnen und Autoren jeder Seite findest du in der Versionsgeschichte im Wiki. Aktuelle Fassungen, Diskussionen und Korrekturen gibt es dort ebenfalls, dieses PDF ist eine Momentaufnahme.</p>
   <p>How to be a Hero e. V., <span class="url">https://howtobeahero.de</span></p>
+  ${book.designCredits?.length ? `<p>${book.designCredits.map(esc).join("<br>")}</p>` : ""}
   <h2>Enthaltene Seiten</h2>
   <ol class="sources">${sources}</ol>
 </section>`;

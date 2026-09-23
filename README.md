@@ -47,8 +47,8 @@ Browser ──> Caddy ──/pdf/*──> wikitopdf (Bun + Chromium)
   gespeichert, alle Werte werden beim Erzeugen neu berechnet.
 * Freigabe: gezielt an einzelne Wiki-Benutzer (Namen werden über die Wiki-API aufgelöst) und
   optional an alle angemeldeten Nutzer. Ohne Anmeldung geht Ausfüllen und PDF, aber kein Speichern.
-* `tools/make_fillable.ts` erzeugt aus den beiden Setting-Bögen ausfüllbare PDF-Formulare
-  (`assets/sheets/`), damit auch der Download ohne Editor ausgefüllt werden kann.
+* `tools/make_fillable.ts` macht Marcels Setting-Bögen ausfüllbar und rechnend wie den offiziellen Bogen. Die Seite bleibt unverändert, es kommen nur Formularfelder dazu: pro Zeile ein Kästchen für die Fähigkeitspunkte, in Marcels Kästchen der berechnete Endwert, über den Gruppen Begabung, Geistesblitzpunkte und übrige Punkte. Die Ausgabe (`assets/sheets/`) wird nicht eingecheckt, sie liegt als aktuelle Dateiversion im Wiki; das Original bleibt in der Dateihistorie. Im Katalog tragen diese Bögen `layout: "setting"`, damit der Editor weiter das gemessene Layout nutzt und nicht die Felder.
+* Aufruf: `bun run tools/make_fillable.ts <original.pdf> assets/sheets/<Name>.pdf`, danach im Wiki mit `importImages --overwrite` als neue Version hochladen.
 
 ## Endpunkte
 

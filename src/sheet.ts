@@ -93,12 +93,14 @@ function layoutSetting(hoehe = 842, breite = 595): Layout {
   };
 }
 
-const layoutCache = new Map<string, { layout: Layout; bytes: Uint8Array }>();
+// Vorlagen eine halbe Stunde merken, damit neue Dateiversionen aus dem Wiki ankommen
+const layoutCache = new Map<string, { layout: Layout; bytes: Uint8Array; at: number }>();
+const VORLAGE_TTL = 30 * 60 * 1000;
 
 export async function ladeVorlage(sheet: Sheet): Promise<{ layout: Layout; bytes: Uint8Array }> {
   const key = sheet.file;
   const hit = layoutCache.get(key);
-  if (hit) return hit;
+  if (hit && Date.now() - hit.at < VORLAGE_TTL) return hit;
   const bytes = await fetchFile(sheet.file);
   const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const page = doc.getPage(0);
@@ -106,7 +108,7 @@ export async function ladeVorlage(sheet: Sheet): Promise<{ layout: Layout; bytes
   const layout = sheet.layout === "setting"
     ? layoutSetting(page.getHeight(), page.getWidth())
     : layoutAusFormular(doc) ?? layoutSetting(page.getHeight(), page.getWidth());
-  const eintrag = { layout, bytes };
+  const eintrag = { layout, bytes, at: Date.now() };
   layoutCache.set(key, eintrag);
   return eintrag;
 }

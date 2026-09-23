@@ -32,6 +32,6 @@ export const cfg = {
   jobsPerMinute: Number(env("JOBS_PER_MINUTE", "6")),
   cacheMaxBytes: Number(env("CACHE_MAX_BYTES", String(2e9))),
   cacheMaxAgeDays: Number(env("CACHE_MAX_AGE_DAYS", "30")),
-  templateVersion: 4,
+  templateVersion: 5,
   internalToken: ladeToken(env("DATA_DIR", "./data")),
 };

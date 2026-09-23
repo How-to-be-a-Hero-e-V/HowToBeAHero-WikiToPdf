@@ -116,6 +116,18 @@ export async function nutzerIds(namen: string[]): Promise<{ gefunden: { nutzer_i
   return { gefunden, fehlend };
 }
 
+const pruefsummen = new Map<string, { at: number; sha1: string }>();
+
+/** SHA-1 der aktuellen Dateiversion im Wiki, zehn Minuten zwischengespeichert. */
+export async function dateiPruefsumme(name: string): Promise<string> {
+  const hit = pruefsummen.get(name);
+  if (hit && Date.now() - hit.at < 600_000) return hit.sha1;
+  const j = await api({ action: "query", prop: "imageinfo", iiprop: "sha1", titles: `Datei:${name}` });
+  const sha1 = j.query?.pages?.[0]?.imageinfo?.[0]?.sha1 ?? "";
+  pruefsummen.set(name, { at: Date.now(), sha1 });
+  return sha1;
+}
+
 export async function rawPage(title: string): Promise<string | null> {
   const u = new URL(cfg.wikiIndex);
   u.searchParams.set("title", title);

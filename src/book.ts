@@ -1,6 +1,6 @@
 import { cfg } from "./config";
 import { loadCatalog, resolvedCatalog, type Catalog } from "./catalog";
-import { pageInfo, parseRevision, fetchFile } from "./wiki";
+import { pageInfo, parseRevision, fetchFile, dateiPruefsumme } from "./wiki";
 import { cleanChapter, buildDocument, decode, type Book, type Part, type Chapter } from "./html";
 import { renderPdf } from "./render";
 import { finalizeBook } from "./pdf";
@@ -125,7 +125,9 @@ export async function resolve(spec: BookSpec, nutzer?: { id: number; gruppen: st
     if (!b.oeffentlich) privat = true;
     boegen.push({ id: b.id, titel: b.titel, geaendert: b.geaendert, design: b.design });
   }
-  const keySrc = JSON.stringify({ v: cfg.templateVersion, t: spec.title, f: spec.fmt, s: sheet?.file ?? null,
+  // Neue Dateiversionen im Wiki (etwa ein Bogen mit Rechenfunktion) sollen alte Bücher nicht aus dem Speicher liefern
+  const sheetSha = sheet ? await dateiPruefsumme(sheet.file).catch(() => "") : null;
+  const keySrc = JSON.stringify({ v: cfg.templateVersion, t: spec.title, f: spec.fmt, s: sheet?.file ?? null, sha: sheetSha,
     b: boegen.map(b => [b.id, b.geaendert]), p: parts.map(p => [p.name, p.chapters.map(c => [c.wikiTitle, c.revid])]) });
   const key = new Bun.CryptoHasher("sha256").update(keySrc).digest("hex").slice(0, 32);
   return { spec, key, parts, sheetFile: sheet?.file, sheetName: sheet?.name, boegen, privat };

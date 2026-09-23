@@ -88,7 +88,8 @@
       "file": "Dysomnia_Charakterbogen.pdf",
       "description": "Setting-Bogen für das Abenteuer Dysomnia.",
       "credit": "Marcel Krauthammer (lejuule)",
-      "creditLink": "https://www.instagram.com/lejuule/"
+      "creditLink": "https://www.instagram.com/lejuule/",
+      "layout": "setting"
     },
     {
       "id": "schwarzertod",
@@ -96,7 +97,8 @@
       "file": "SchwarzerTod_Charakterbogen.pdf",
       "description": "Setting-Bogen für das Abenteuer Der Schwarze Tod.",
       "credit": "Marcel Krauthammer (lejuule)",
-      "creditLink": "https://www.instagram.com/lejuule/"
+      "creditLink": "https://www.instagram.com/lejuule/",
+      "layout": "setting"
     },
     {
       "id": "waldemar",
@@ -104,7 +106,8 @@
       "file": "WoIstWaldemar_Charakterbogen.pdf",
       "description": "Setting-Bogen für das Abenteuer Wo ist Waldemar?",
       "credit": "Marcel Krauthammer (lejuule)",
-      "creditLink": "https://www.instagram.com/lejuule/"
+      "creditLink": "https://www.instagram.com/lejuule/",
+      "layout": "setting"
     },
     {
       "id": "jailhouse",
@@ -113,7 +116,8 @@
       "description": "Setting-Bogen für das Abenteuer Jailhouse Boogie, mit Mugshot statt Portrait.",
       "credit": "Marcel Krauthammer (lejuule)",
       "creditLink": "https://www.instagram.com/lejuule/",
-      "portraitMischen": "multiply"
+      "portraitMischen": "multiply",
+      "layout": "setting"
     },
     {
       "id": "standard_en",

@@ -102,7 +102,10 @@ export async function ladeVorlage(sheet: Sheet): Promise<{ layout: Layout; bytes
   const bytes = await fetchFile(sheet.file);
   const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
   const page = doc.getPage(0);
-  const layout = layoutAusFormular(doc) ?? layoutSetting(page.getHeight(), page.getWidth());
+  // Setting-Bögen immer mit dem gemessenen Layout, auch wenn ihre PDF-Fassung Formularfelder bekommt
+  const layout = sheet.layout === "setting"
+    ? layoutSetting(page.getHeight(), page.getWidth())
+    : layoutAusFormular(doc) ?? layoutSetting(page.getHeight(), page.getWidth());
   const eintrag = { layout, bytes };
   layoutCache.set(key, eintrag);
   return eintrag;
